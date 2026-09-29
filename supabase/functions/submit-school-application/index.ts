@@ -24,6 +24,21 @@ function normalizeSearchText(value: string) {
   return value.trim().replace(/\s+/g, ' ');
 }
 
+function clientAddress(request: Request) {
+  const forwardedFor = request.headers.get('x-forwarded-for') || '';
+  const firstForwarded = forwardedFor.split(',')[0]?.trim();
+  return firstForwarded
+    || request.headers.get('cf-connecting-ip')
+    || request.headers.get('x-real-ip')
+    || 'unknown';
+}
+
+async function sha256Hex(value: string) {
+  const data = new TextEncoder().encode(value);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return response({ error: 'Method not allowed' }, 405);
@@ -46,6 +61,36 @@ Deno.serve(async request => {
   }
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const clientKey = await sha256Hex(`${clientAddress(request)}:${email}`);
+  const windowStartedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data: rateLimitRow, error: rateLimitReadError } = await admin
+    .from('school_application_rate_limits')
+    .select('attempt_count, window_started_at')
+    .eq('client_key', clientKey)
+    .maybeSingle();
+  if (rateLimitReadError) {
+    console.error('submit-school-application rate-limit read failed', rateLimitReadError);
+    return response({ error: 'Başvuru şu anda kaydedilemedi. Lütfen daha sonra tekrar deneyin.' }, 500);
+  }
+  if (rateLimitRow && rateLimitRow.window_started_at >= windowStartedAt && Number(rateLimitRow.attempt_count || 0) >= 5) {
+    return response({ error: 'Kısa süre içinde çok fazla başvuru denendi. Lütfen bir süre sonra tekrar deneyin.' }, 429);
+  }
+  const nextAttemptCount = rateLimitRow && rateLimitRow.window_started_at >= windowStartedAt
+    ? Number(rateLimitRow.attempt_count || 0) + 1
+    : 1;
+  const { error: rateLimitWriteError } = await admin
+    .from('school_application_rate_limits')
+    .upsert({
+      client_key: clientKey,
+      window_started_at: nextAttemptCount === 1 ? new Date().toISOString() : rateLimitRow?.window_started_at,
+      attempt_count: nextAttemptCount,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'client_key' });
+  if (rateLimitWriteError) {
+    console.error('submit-school-application rate-limit write failed', rateLimitWriteError);
+    return response({ error: 'Başvuru şu anda kaydedilemedi. Lütfen daha sonra tekrar deneyin.' }, 500);
+  }
+
   const { data: existingApplication, error: existingError } = await admin
     .from('school_applications')
     .select('id, status')
@@ -70,6 +115,7 @@ Deno.serve(async request => {
     .from('school_applications')
     .select('id, status')
     .ilike('school_name', normalizedSchoolName)
+    .in('status', ['PENDING', 'INFO_REQUESTED'])
     .limit(1)
     .maybeSingle();
   if (existingNameApplicationError) {
@@ -102,5 +148,59 @@ Deno.serve(async request => {
     console.error('submit-school-application failed', error);
     return response({ error: 'Başvuru şu anda kaydedilemedi. Lütfen daha sonra tekrar deneyin.' }, 500);
   }
+
+  try {
+    const { data: superAdmins, error: superAdminError } = await admin
+      .from('profiles')
+      .select('id, school_id')
+      .eq('role', 'super_admin');
+    if (superAdminError) throw superAdminError;
+    const recipientIds = [...new Set((superAdmins || []).map(profile => String(profile.id || '')).filter(Boolean))];
+    const notificationSchoolId = superAdmins?.find(profile => profile.school_id)?.school_id;
+    if (recipientIds.length && notificationSchoolId) {
+      const { data: notification, error: notificationError } = await admin
+        .from('notifications')
+        .insert({
+          school_id: notificationSchoolId,
+          audience: 'Süper Admin',
+          title: 'Yeni futbol okulu başvurusu',
+          body: `${schoolName} için yeni başvuru alındı.`,
+          status: 'queued',
+          recipient_count: recipientIds.length,
+          delivered_count: 0,
+          read_count: 0
+        })
+        .select('id')
+        .single();
+      if (notificationError || !notification) throw notificationError || new Error('Bildirim oluşturulamadı.');
+
+      const { error: recipientError } = await admin.from('notification_recipients').insert(
+        recipientIds.map(userId => ({ notification_id: notification.id, user_id: userId }))
+      );
+      if (recipientError) throw recipientError;
+
+      const pushResponse = await fetch(`${url}/functions/v1/send-push-notification`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'send',
+          internalService: true,
+          schoolId: notificationSchoolId,
+          recipientUserIds: recipientIds,
+          notificationId: notification.id
+        })
+      });
+      if (!pushResponse.ok) {
+        console.error('submit-school-application push notification failed', await pushResponse.text());
+      }
+    }
+  } catch (notificationError) {
+    console.error('submit-school-application notification failed', notificationError);
+  }
+
   return response({ id: data.id, createdAt: data.created_at, status: 'PENDING' }, 201);
 });

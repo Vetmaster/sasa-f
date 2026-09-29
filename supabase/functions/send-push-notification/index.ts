@@ -45,18 +45,26 @@ Deno.serve(async request => {
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
-  const { data: userResult, error: userError } = await admin.auth.getUser(accessToken);
-  if (userError || !userResult.user) return json({ error: 'Unauthorized' }, 401);
+  const isInternalServiceCall = accessToken === serviceRoleKey && body.internalService === true;
+  let callerUserId = '';
+  let callerSchoolId = '';
+  let isPlatformSuperAdmin = isInternalServiceCall;
+  if (!isInternalServiceCall) {
+    const { data: userResult, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userResult.user) return json({ error: 'Unauthorized' }, 401);
+    callerUserId = userResult.user.id;
 
-  const { data: callerProfile, error: profileError } = await admin
-    .from('profiles')
-    .select('school_id, role')
-    .eq('id', userResult.user.id)
-    .maybeSingle();
-  if (profileError || !callerProfile) return json({ error: 'Profile not found' }, 403);
+    const { data: callerProfile, error: profileError } = await admin
+      .from('profiles')
+      .select('school_id, role')
+      .eq('id', callerUserId)
+      .maybeSingle();
+    if (profileError || !callerProfile) return json({ error: 'Profile not found' }, 403);
+    callerSchoolId = callerProfile.school_id;
+    isPlatformSuperAdmin = callerProfile.role === 'super_admin';
+  }
 
-  const requestedSchoolId = String(body.schoolId || callerProfile.school_id || '');
-  const isPlatformSuperAdmin = callerProfile.role === 'super_admin';
+  const requestedSchoolId = String(body.schoolId || callerSchoolId || '');
   if (!requestedSchoolId) {
     return json({ error: 'Forbidden school context' }, 403);
   }
@@ -65,7 +73,7 @@ Deno.serve(async request => {
     const { data: callerMembership, error: membershipError } = await admin
       .from('school_user_memberships')
       .select('role')
-      .eq('user_id', userResult.user.id)
+      .eq('user_id', callerUserId)
       .eq('school_id', requestedSchoolId)
       .maybeSingle();
     const canCreateTrainingAsCoach = requestedAction === 'create-training-and-send' && callerMembership?.role === 'coach';
@@ -145,7 +153,7 @@ Deno.serve(async request => {
         title: `${group.name} grubu · Yeni antrenman`,
         body: `${formattedDate} saat ${startTime.slice(0, 5)}’de ${title} antrenmanı yapılacaktır.`,
         status: 'queued',
-        sent_by: userResult.user.id
+        sent_by: callerUserId
       })
       .select('id')
       .single();
@@ -181,7 +189,7 @@ Deno.serve(async request => {
         title,
         body: notificationBody,
         status: 'queued',
-        sent_by: userResult.user.id
+        sent_by: callerUserId
       })
       .select('id')
       .single();
@@ -286,7 +294,7 @@ Deno.serve(async request => {
   }
 
   if (notification.audience === 'Tüm kullanıcılar') {
-    recipientIds.push(userResult.user.id);
+    recipientIds.push(callerUserId);
   }
   recipientIds = [...new Set(recipientIds.filter(Boolean))];
   const { error: clearRecipientsError } = await admin
