@@ -156,7 +156,18 @@ Deno.serve(async request => {
       .eq('role', 'super_admin');
     if (superAdminError) throw superAdminError;
     const recipientIds = [...new Set((superAdmins || []).map(profile => String(profile.id || '')).filter(Boolean))];
-    const notificationSchoolId = superAdmins?.find(profile => profile.school_id)?.school_id;
+    let notificationSchoolId = superAdmins?.find(profile => profile.school_id)?.school_id;
+    if (!notificationSchoolId) {
+      const { data: systemSchool, error: systemSchoolError } = await admin
+        .from('schools')
+        .select('id')
+        .eq('is_active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (systemSchoolError) throw systemSchoolError;
+      notificationSchoolId = systemSchool?.id;
+    }
     if (recipientIds.length && notificationSchoolId) {
       const { data: notification, error: notificationError } = await admin
         .from('notifications')
