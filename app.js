@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.25.506';
+const APP_VERSION = '2026.09.29.507';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -906,7 +906,7 @@ function notificationDate(value) {
   return new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(date);
 }
 function notificationTargetLabel(audience) {
-  if (audience === 'Süper Admin') return 'SASA-F';
+  if (audience === 'Süper Admin') return 'Süper Admin';
   if (audience === 'Abonelik işlemi') return state.schoolName || 'Okul';
   return ['Aidat borcu olanlar', 'Aidat borcu olmayanlar'].includes(audience)
     ? 'Aidat hatırlatma'
@@ -2167,7 +2167,9 @@ function notificationsView() {
     const statusMarkup = canDelete
       ? `<div class="notification-metrics">${deliveryStatus}${readStatus}</div>`
       : `<span class="status ${!sentByCurrentUser && !item.read ? 'warning' : ''}">${escapeHtml(visibleStatus)}</span>`;
-    const senderLabel = item.audience === 'Abonelik işlemi' ? 'SASA-F' : (state.schoolName || 'Okul');
+    const senderLabel = !item.sentBy || item.audience === 'Abonelik işlemi'
+      ? 'SASA-F'
+      : (state.schoolName || 'Okul');
     return `<div class="list-row notification-list-row"><span class="time">${escapeHtml(item.date)}</span><div class="notification-list-content"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body || '')}</p><small>${escapeHtml(senderLabel)} --> ${escapeHtml(notificationTargetLabel(item.audience))} · ${escapeHtml(item.time)}</small></div>${deleteButton}${statusMarkup}</div>`;
   }).join('');
   return `<div class="page-stack"><div class="section-heading"><div><h2>Bildirim merkezi</h2><p>Telefon bildirimleri ve gönderilen duyurular</p></div></div>${pushPermissionCard}${composePanel}<section class="panel"><div class="panel-heading"><h3>Son bildirimler</h3><span class="status">${state.notifications.length} kayıt</span></div>${notificationRows}</section></div>`;
