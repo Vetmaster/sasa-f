@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.509';
+const APP_VERSION = '2026.09.29.510';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -2370,7 +2370,48 @@ function render() {
   document.querySelector('.user-avatar').textContent = initials(state.userFullName || state.userEmail || 'SF');
   setSafeHtml(appContent, views[state.page]());
   appContent.focus({ preventScroll: true });
-  startVisiblePageRefreshGuard();
+}
+
+function patchVisiblePageFromRealtime() {
+  if (!appContent || appShell.classList.contains('is-hidden')) return;
+  captureNotificationDraftFromDom();
+  const template = document.createElement('template');
+  template.innerHTML = sanitizedHtml(views[state.page]());
+  const currentRoots = [...appContent.children];
+  const nextRoots = [...template.content.children];
+  const activeElement = document.activeElement;
+
+  if (currentRoots.length !== nextRoots.length) {
+    appContent.replaceChildren(...nextRoots);
+  } else {
+    currentRoots.forEach((currentRoot, rootIndex) => {
+      const nextRoot = nextRoots[rootIndex];
+      if (!nextRoot || currentRoot.tagName !== nextRoot.tagName || currentRoot.className !== nextRoot.className) {
+        currentRoot.replaceWith(nextRoot);
+        return;
+      }
+      const currentChildren = [...currentRoot.children];
+      const nextChildren = [...nextRoot.children];
+      if (currentChildren.length !== nextChildren.length) {
+        if (!currentRoot.contains(activeElement)) currentRoot.replaceWith(nextRoot);
+        return;
+      }
+      currentChildren.forEach((currentChild, childIndex) => {
+        const nextChild = nextChildren[childIndex];
+        if (!nextChild || currentChild.outerHTML === nextChild.outerHTML || currentChild.contains(activeElement)) return;
+        currentChild.replaceWith(nextChild);
+      });
+    });
+  }
+
+  updateNotificationUnreadBadge();
+  const currentSchoolName = document.querySelector('#currentSchoolName');
+  if (currentSchoolName) currentSchoolName.textContent = state.schoolName || 'Futbol Okulu';
+  const pageSubtitle = document.querySelector('#pageSubtitle');
+  if (pageSubtitle) {
+    const subtitle = pageMeta[state.page]?.[1] || '';
+    pageSubtitle.textContent = state.schoolName ? `${subtitle} · ${state.schoolName}` : subtitle;
+  }
 }
 
 function updateNotificationUnreadBadge() {
@@ -2867,7 +2908,9 @@ const REALTIME_TABLES = [
   'attendance_sessions',
   'attendance_records',
   'access_requests',
-  'school_user_memberships'
+  'school_user_memberships',
+  'school_applications',
+  'subscription_payment_reports'
 ];
 let realtimeChannel = null;
 let realtimeRefreshTimer = null;
@@ -2967,6 +3010,15 @@ async function refreshRemoteDataFromRealtime() {
       }));
       }
     }
+    if (tables.has('school_applications') && state.page === 'applications' && isActualSuperAdmin()) {
+      tasks.push(remoteDataStore.listSchoolApplications().then(rows => { state.schoolApplications = rows; }));
+    }
+    if (tables.has('subscription_payment_reports') && state.page === 'subscriptionPayments' && isActualSuperAdmin()) {
+      tasks.push(remoteDataStore.listSubscriptionPaymentReports().then(rows => { state.subscriptionPaymentReports = rows; }));
+    }
+    if (tables.has('schools') && ['schools', 'subscriptions'].includes(state.page) && isActualSuperAdmin()) {
+      tasks.push(refreshSchools());
+    }
     if (tables.has('schools') || tables.has('training_groups') || tables.has('training_types') || tables.has('training_coaches') || tables.has('training_fields') || tables.has('school_user_memberships')) {
       tasks.push(remoteDataStore.loadConfiguration(state.actualRole).then(configuration => {
         state.schoolName = configuration.school.name || state.schoolName;
@@ -2978,7 +3030,7 @@ async function refreshRemoteDataFromRealtime() {
       }));
     }
     await Promise.all(tasks);
-    render();
+    patchVisiblePageFromRealtime();
     if (state.page === 'notifications') markAllNotificationsRead();
   } catch (error) {
     console.error('Realtime veri yenileme hatası:', error);
@@ -3005,6 +3057,8 @@ function scheduleRealtimeRefresh(payload = null) {
     return;
   }
   if (payload?.table) realtimeChangedTables.add(payload.table);
+  window.clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer = window.setTimeout(refreshRemoteDataFromRealtime, 700);
 }
 
 function queueRealtimeReconnect(delay = 1500) {
