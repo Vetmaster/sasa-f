@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.510';
+const APP_VERSION = '2026.09.29.511';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1521,13 +1521,13 @@ function onboardingView() {
   if (trialStarted && !state.onboardingPurchaseOpen) {
     const trialEndsOn = state.schoolSubscriptionEndsOn;
     const remaining = trialRemainingLabel(trialEndsOn);
-    return `<div class="page-stack"><section class="panel onboarding-card"><span class="eyebrow">DENEME BAŞLATILDI</span><h2>Standart üyeliğinizi 2 ay boyunca ücretsiz deneyebilirsiniz.</h2><p>Deneme sonunda aboneliğinizi başlatabilirsiniz.</p>${remaining ? `<p class="onboarding-trial-remaining"><strong>Deneme bitişi:</strong> ${subscriptionDateLabel(trialEndsOn)} · ${remaining}</p>` : ''}<div class="onboarding-actions"><button class="primary-button" type="button" data-action="complete-onboarding">Yönetim ekranına geç</button><button class="secondary-button" type="button" data-action="open-subscription-purchase">Satın al</button></div></section>${subscriptionHistorySection()}</div>`;
+    return `<div class="page-stack"><section class="panel onboarding-card"><span class="eyebrow">DENEME BAŞLATILDI</span><h2>Standart üyeliğinizi 3 ay boyunca ücretsiz deneyebilirsiniz.</h2><p>Deneme sonunda aboneliğinizi başlatabilirsiniz.</p>${remaining ? `<p class="onboarding-trial-remaining"><strong>Deneme bitişi:</strong> ${subscriptionDateLabel(trialEndsOn)} · ${remaining}</p>` : ''}<div class="onboarding-actions"><button class="primary-button" type="button" data-action="complete-onboarding">Yönetim ekranına geç</button><button class="secondary-button" type="button" data-action="open-subscription-purchase">Satın al</button></div></section>${subscriptionHistorySection()}</div>`;
   }
   if (paymentPending) return `<div class="page-stack"><section class="panel onboarding-card"><span class="eyebrow">ÖDEME İNCELEMEDE</span><h2>Havale bildiriminiz alındı.</h2><p>sasa-f.com ödemeyi onayladığında aboneliğiniz etkinleşir. Bu aşamada ödeme talep edilmez.</p></section>${subscriptionHistorySection()}</div>`;
   const bankAccounts = state.subscriptionBankAccounts?.length
     ? `<div class="parent-bank-account-list">${state.subscriptionBankAccounts.map((account, index) => `<article class="parent-bank-account ${parentBankThemeClass(account.bankName)}"><strong>${escapeHtml(account.bankName)}</strong><small>${escapeHtml(account.accountHolder)}</small><code>${escapeHtml(formatIban(account.iban))}</code><button class="secondary-button" type="button" data-action="copy-subscription-iban" data-account-index="${index}">IBAN'ı kopyala</button></article>`).join('')}</div>`
     : '<p class="muted">Havale hesabı bilgileri henüz tanımlanmadı. Ödeme bildirimi oluşturmak için yetkili ile iletişime geçin.</p>';
-  const trialChoice = (trialStarted || subscriptionActive) ? '' : `<section class="panel onboarding-card"><span class="eyebrow">HOŞ GELDİNİZ</span><h2>Aboneliğinizi nasıl başlatmak istersiniz?</h2><p>Standart üyeliğinizi 2 ay ücretsiz deneyebilir veya havale bildirimi oluşturabilirsiniz.</p><button class="primary-button" type="button" data-action="start-school-trial">2 ay ücretsiz dene</button></section>`;
+  const trialChoice = (trialStarted || subscriptionActive) ? '' : `<section class="panel onboarding-card"><span class="eyebrow">HOŞ GELDİNİZ</span><h2>Aboneliğinizi nasıl başlatmak istersiniz?</h2><p>Standart üyeliğinizi 3 ay ücretsiz deneyebilir veya havale bildirimi oluşturabilirsiniz.</p><button class="primary-button" type="button" data-action="start-school-trial">3 ay ücretsiz dene</button></section>`;
   const purchaseTitle = subscriptionActive ? 'Aboneliğinizi uzatın' : trialStarted ? 'Aboneliğinizi başlatın' : 'Aboneliği başlat';
   return `<div class="page-stack">${trialChoice}<section class="panel onboarding-card"><h3>${purchaseTitle}</h3><label>Ödeme dönemi<select id="onboardingBillingPeriod"><option value="monthly">1 aylık</option><option value="quarterly">3 aylık</option><option value="yearly">Yıllık</option></select></label><p class="onboarding-payment-amount" id="onboardingPaymentAmount" aria-live="polite">${onboardingPaymentAmountMarkup()}</p><div class="payment-method-list"><span class="status blue">Havale</span><button class="secondary-button" type="button" disabled>Kredi kartı · Yakında</button></div>${bankAccounts}<label>Havale gönderen ad soyad<input id="onboardingPayerName" maxlength="120" autocomplete="name" placeholder="Ödemeyi gönderen kişinin adı soyadı"></label><button class="primary-button" type="button" data-action="report-subscription-payment">Ödemeyi yaptım</button><small class="muted">Ödeme bildirimi gönderildikten sonra sasa-f.com tarafından onayı beklenir; abonelik otomatik olarak açılmaz.</small></section>${subscriptionHistorySection()}</div>`;
 }
@@ -4847,9 +4847,9 @@ document.addEventListener('click', async event => {
     state.onboarding = saved;
     state.schoolSubscriptionPlan = 'standard';
     state.schoolSubscriptionStatus = 'trial';
-    state.schoolSubscriptionEndsOn = localDateAfterMonths(localDateValue(), 2);
+    state.schoolSubscriptionEndsOn = localDateAfterMonths(localDateValue(), 3);
     render();
-    showToast('2 aylık ücretsiz deneme başlatıldı.');
+    showToast('3 aylık ücretsiz deneme başlatıldı.');
     return;
   }
   else if (action === 'open-subscription-purchase' && state.role === 'admin') {
