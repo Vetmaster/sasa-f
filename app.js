@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.508';
+const APP_VERSION = '2026.09.29.509';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -457,11 +457,12 @@ function navigateToPage(page, updates = {}) {
   }
   // Sayfa görünür olur; sayfaya ait veri arka planda getirilip yalnızca o
   // ekran yeniden çizilir. Böylece sekme geçişi tüm okul verisini çekmez.
-  loadPageData(targetPage).then(() => {
+  loadPageData(targetPage, { force: true }).then(() => {
     if (state.page !== targetPage) return;
     render();
     if (targetPage === 'notifications') markAllNotificationsRead();
   }).catch(error => console.error(`${targetPage} verisi yüklenemedi:`, error));
+  queueVisiblePageDataRefresh();
   if (targetPage === 'notifications') refreshPushStatus(true);
 }
 
@@ -3004,8 +3005,6 @@ function scheduleRealtimeRefresh(payload = null) {
     return;
   }
   if (payload?.table) realtimeChangedTables.add(payload.table);
-  window.clearTimeout(realtimeRefreshTimer);
-  realtimeRefreshTimer = window.setTimeout(refreshRemoteDataFromRealtime, 700);
 }
 
 function queueRealtimeReconnect(delay = 1500) {
@@ -3031,7 +3030,6 @@ function startRealtimeSync({ preservePending = false } = {}) {
       queueRealtimeReconnect(realtimeChannelStatus === 'timed_out' ? 2500 : 1500);
     }
   });
-  startVisiblePageRefreshGuard();
 }
 
 function queueVisiblePageDataRefresh() {
@@ -3080,6 +3078,15 @@ function handleAppResume() {
   if (!state.userId || appShell.classList.contains('is-hidden')) return;
   startRealtimeSync({ preservePending: true });
   refreshPushStatus(state.page === 'notifications' || state.page === 'dashboard');
+  if (state.page === 'schools' || state.page === 'subscriptions') {
+    refreshSchools().then(render).catch(error => console.error('Okul verileri yenilenemedi:', error));
+  } else if (state.page === 'applications') {
+    remoteDataStore.listSchoolApplications().then(rows => { state.schoolApplications = rows; render(); }).catch(error => console.error('Başvurular yenilenemedi:', error));
+  } else if (state.page === 'subscriptionPayments') {
+    remoteDataStore.listSubscriptionPaymentReports().then(rows => { state.subscriptionPaymentReports = rows; render(); }).catch(error => console.error('Ödeme bildirimleri yenilenemedi:', error));
+  } else {
+    loadPageData(state.page, { force: true }).then(render).catch(error => console.error(`${state.page} verisi yenilenemedi:`, error));
+  }
   queueVisiblePageDataRefresh();
 }
 
