@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.507';
+const APP_VERSION = '2026.09.29.508';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -48,7 +48,7 @@ const remoteDataStore = supabaseClient && window.SasaSupabaseData?.create(supaba
 const initialFragmentParameters = new URLSearchParams(window.location.hash.slice(1));
 const PENDING_OPEN_PAGE_STORAGE_KEY = 'sasa_pending_open_page';
 const initialRequestedOpenPage = runtimeQueryParameters.get('open') || initialFragmentParameters.get('open') || '';
-if (['notifications', 'onboarding', 'userApprovals'].includes(initialRequestedOpenPage)) {
+if (['notifications', 'onboarding', 'userApprovals', 'applications'].includes(initialRequestedOpenPage)) {
   try {
     window.sessionStorage.setItem(PENDING_OPEN_PAGE_STORAGE_KEY, initialRequestedOpenPage);
   } catch {
@@ -2170,7 +2170,13 @@ function notificationsView() {
     const senderLabel = !item.sentBy || item.audience === 'Abonelik işlemi'
       ? 'SASA-F'
       : (state.schoolName || 'Okul');
-    return `<div class="list-row notification-list-row"><span class="time">${escapeHtml(item.date)}</span><div class="notification-list-content"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body || '')}</p><small>${escapeHtml(senderLabel)} --> ${escapeHtml(notificationTargetLabel(item.audience))} · ${escapeHtml(item.time)}</small></div>${deleteButton}${statusMarkup}</div>`;
+    const destinationPage = item.title === 'Yeni futbol okulu başvurusu' && state.role === 'super_admin'
+      ? 'applications'
+      : '';
+    const destinationAttributes = destinationPage
+      ? ` data-page="${destinationPage}" role="button" tabindex="0" aria-label="${escapeHtml(item.title)} bildirimini aç"`
+      : '';
+    return `<div class="list-row notification-list-row"><span class="time">${escapeHtml(item.date)}</span><div class="notification-list-content"${destinationAttributes}><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body || '')}</p><small>${escapeHtml(senderLabel)} --> ${escapeHtml(notificationTargetLabel(item.audience))} · ${escapeHtml(item.time)}</small></div>${deleteButton}${statusMarkup}</div>`;
   }).join('');
   return `<div class="page-stack"><div class="section-heading"><div><h2>Bildirim merkezi</h2><p>Telefon bildirimleri ve gönderilen duyurular</p></div></div>${pushPermissionCard}${composePanel}<section class="panel"><div class="panel-heading"><h3>Son bildirimler</h3><span class="status">${state.notifications.length} kayıt</span></div>${notificationRows}</section></div>`;
 }

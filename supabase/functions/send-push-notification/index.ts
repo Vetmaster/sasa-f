@@ -208,6 +208,9 @@ Deno.serve(async request => {
     .eq('school_id', targetSchoolId)
     .maybeSingle();
   if (notificationError || !notification) return json({ error: 'Notification not found' }, 404);
+  const notificationUrl = notification.title === 'Yeni futbol okulu başvurusu'
+    ? 'https://sasa-f.com/?open=applications'
+    : 'https://sasa-f.com/?open=notifications';
 
   await admin.from('notifications').update({ status: 'queued' }).eq('id', notification.id);
 
@@ -361,7 +364,7 @@ Deno.serve(async request => {
                   body: notification.body,
                   message: notification.body,
                   notificationId: String(notification.id),
-                  url: 'https://sasa-f.com/?open=notifications',
+                  url: notificationUrl,
                   icon: 'https://sasa-f.com/sasa-f-icon-v3.svg',
                   badge: 'https://sasa-f.com/sasa-f-notification-badge.png',
                   tag: `sasa-f-${notification.id}`
@@ -370,7 +373,7 @@ Deno.serve(async request => {
                   ? {
                     webpush: {
                       headers: { TTL: '3600', Urgency: 'high' },
-                      fcm_options: { link: 'https://sasa-f.com/?open=notifications' }
+                      fcm_options: { link: notificationUrl }
                     }
                   }
                   : {
@@ -407,7 +410,7 @@ Deno.serve(async request => {
     title: notification.title,
     body: notification.body,
     tag: `sasa-f-${notification.id}`,
-    url: 'https://sasa-f.com/?open=notifications'
+    url: notificationUrl
   });
 
   // Aynı tarayıcı hem eski VAPID hem web FCM ile kayıtlıysa çift bildirim
