@@ -3659,7 +3659,7 @@ async function saveAndSendNotification({ audience, title, body, studentId = null
     title: normalizedTitle,
     body: normalizedBody,
     audience: normalizedAudience,
-    sentBy: state.userId,
+    sentBy: state.actualRole === 'super_admin' ? null : state.userId,
     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     status: 'Sırada'
   };
@@ -3707,7 +3707,7 @@ async function createTrainingAndSendNotification(training) {
     title: `${training.group} grubu · Yeni antrenman`,
     body: `${formatTrainingDateLong(training.date)} saat ${training.time}’de ${training.title} antrenmanı yapılacaktır.`,
     audience: `${training.group} velileri`,
-    sentBy: state.userId,
+    sentBy: state.actualRole === 'super_admin' ? null : state.userId,
     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     status: Number(result.sent || 0) > 0 ? 'Teslim edildi' : 'Başarısız',
     recipientCount: Number(result.recipients || 0),
