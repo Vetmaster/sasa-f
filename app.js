@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.512';
+const APP_VERSION = '2026.09.29.513';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -307,6 +307,7 @@ const navItems = {
   applications: { label: 'Başvurular', icon: '✦', roles: ['super_admin'] },
   subscriptionPayments: { label: 'Ödemeler', icon: MENU_ICONS.subscriptions, roles: ['super_admin'] },
   emailLogs: { label: 'E-posta Kayıtları', icon: '✉', roles: ['super_admin'], hidden: true },
+  help: { label: 'Yardım', icon: '?', roles: ['super_admin', 'admin'], hidden: true },
   onboarding: { label: 'Aboneliği başlat', icon: MENU_ICONS.subscriptions, roles: ['admin'], hidden: true },
   bankSettings: { label: 'Aidat Havale Bilgileri', icon: MENU_ICONS.bank, roles: ['super_admin', 'admin'], hidden: true },
   subscriptionBankSettings: { label: 'Abonelik Havale Bilgileri', icon: MENU_ICONS.bank, roles: ['super_admin'], hidden: true },
@@ -333,7 +334,7 @@ const roleNames = { super_admin: 'Süper Admin', admin: 'Admin', coach: 'Antren�
 const pageMeta = {
   dashboard: ['Genel Bakış', 'Kulübün bugünkü durumu'], schools: ['Okullar', 'Tüm futbol okullarını tek ekrandan yönetin'], settings: ['Ayarlar', 'Okul ve abonelik ayarları'], subscriptions: ['Abonelikler', 'Okulların abonelik durumları'], applications: ['Başvurular', 'Yeni müşteri başvurularını inceleyin'], subscriptionPayments: ['Ödemeler', 'Abonelik ödeme bildirimlerini onaylayın'], onboarding: ['Aboneliğinizi başlatın', 'Deneme hesabı veya satın alma seçin'], bankSettings: ['Aidat Havale Bilgileri', 'Velilere gösterilecek banka hesabı'], subscriptionBankSettings: ['Abonelik Havale Bilgileri', 'Okul yöneticilerinin abonelik ödemesinde göreceği hesaplar'], students: ['Öğrenciler', 'Kayıtlar ve öğrenci profilleri'], studentSettings: ['Öğrenci Ayarları', 'Antrenman gruplarını yönetin'], studentProfile: ['Öğrenci Profili', 'Öğrenci bilgileri ve antrenman durumu'], studentAttendanceHistory: ['Öğrenci Yoklamaları', 'Geldiği ve gelmediği antrenmanlar'], child: ['Öğrenci', 'Öğrenci profili ve güncel durum'],
   trainings: ['Antrenman', 'Antrenman takvimi ve gruplar'], trainingSettings: ['Antrenman Ayarları', 'Antrenman isimlerini ve antrenörleri yönetin'], attendance: ['Yoklama', 'Antrenman katılım takibi'], fees: ['Aidat', 'Aylık ödeme ve tahsilat takibi'], parentPayment: ['Ödeme Yap', 'Aidat ödeme yöntemini seçin'], parentBankTransfer: ['Aidat Havale Bilgileri', 'Kulübün banka hesabı bilgileri'], parentCardPayment: ['Kartla Ödeme', 'Güvenli ödeme önizlemesi'],
-  accounting: ['Muhasebe', 'Temel gelir ve gider takibi'], accountingSettings: ['Muhasebe Ayarları', 'Aylık aidat tutarı ve tahakkuk ayarları'], accountingEntries: ['Son İşlemler', 'Tüm gelir ve gider kayıtları'], userApprovals: ['Kullanıcı Onayları', 'Yeni kullanıcıların erişim talepleri'], emailLogs: ['E-posta Kayıtları', 'Sistemden gönderilen mail işlemleri'], notifications: ['Bildirimler', 'Duyurular ve gönderim merkezi']
+  accounting: ['Muhasebe', 'Temel gelir ve gider takibi'], accountingSettings: ['Muhasebe Ayarları', 'Aylık aidat tutarı ve tahakkuk ayarları'], accountingEntries: ['Son İşlemler', 'Tüm gelir ve gider kayıtları'], userApprovals: ['Kullanıcı Onayları', 'Yeni kullanıcıların erişim talepleri'], emailLogs: ['E-posta Kayıtları', 'Sistemden gönderilen mail işlemleri'], help: ['Yardım', 'Kullanım videoları ve sık sorulan sorular'], notifications: ['Bildirimler', 'Duyurular ve gönderim merkezi']
 };
 
 function persistNavigationState() {
@@ -1575,8 +1576,24 @@ function settingsView() {
         <span class="settings-link-copy"><strong>E-posta Kayıtları</strong><small>Sistemden gönderilen davet ve hatırlatma maillerini görüntüleyin.</small></span>
         <span class="settings-link-arrow" aria-hidden="true">›</span>
       </button>` : ''}
+      <button class="panel settings-link-card" type="button" data-page="help">
+        <span class="settings-link-icon settings-help-icon" aria-hidden="true">?</span>
+        <span class="settings-link-copy"><strong>Yardım</strong><small>Kullanım videolarını ve sık sorulan soruları görüntüleyin.</small></span>
+        <span class="settings-link-arrow" aria-hidden="true">›</span>
+      </button>
     </section>
   </div>`;
+}
+
+function helpView() {
+  const topics = [
+    ['Futbol okulu olarak nasıl başvurulur?', 'Futbol okulu başvurusunun nasıl oluşturulduğunu adım adım izleyin.'],
+    ['Şifre nasıl oluşturulur?', 'Davet e-postasındaki bağlantıyı kullanarak hesabınızı nasıl etkinleştireceğinizi izleyin.'],
+    ['Ücretsiz deneme nasıl başlatılır?', '3 aylık ücretsiz denemeyi başlatma ve abonelik seçeneklerini görüntüleme adımlarını izleyin.'],
+    ['Yeni öğrenci nasıl eklenir?', 'Öğrenci, veli iletişim bilgileri ve aidat bilgilerinin nasıl kaydedildiğini izleyin.']
+  ];
+  const cards = topics.map(([question, description]) => `<details class="panel help-topic-card"><summary><span>${escapeHtml(question)}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><div class="help-topic-content"><p>${escapeHtml(description)}</p><div class="help-video-placeholder"><span aria-hidden="true">▶</span><strong>Kullanım videosu</strong><small>Video bağlantısı eklendiğinde burada izlenebilecek.</small></div></div></details>`).join('');
+  return `<div class="page-stack"><div class="section-heading"><div><h2>Yardım</h2><p>Merak ettiğiniz konuyu açarak kullanım videosuna ulaşabilirsiniz.</p></div></div><section class="help-topic-list" aria-label="Yardım konuları">${cards}</section></div>`;
 }
 
 function bankAccountSettingsCardMarkup(account = {}, index = 0, accountCount = 1, isUnsaved = false) {
@@ -2168,9 +2185,9 @@ function notificationsView() {
     const statusMarkup = canDelete
       ? `<div class="notification-metrics">${deliveryStatus}${readStatus}</div>`
       : `<span class="status ${!sentByCurrentUser && !item.read ? 'warning' : ''}">${escapeHtml(visibleStatus)}</span>`;
-    const senderLabel = !item.sentBy || item.audience === 'Abonelik işlemi'
+    const senderLabel = item.senderLabel || (!item.sentBy || item.audience === 'Abonelik işlemi'
       ? 'SASA-F'
-      : (state.schoolName || 'Okul');
+      : (state.schoolName || 'Okul'));
     const destinationPage = item.title === 'Yeni futbol okulu başvurusu' && state.role === 'super_admin'
       ? 'applications'
       : '';
@@ -2309,7 +2326,7 @@ function emailLogsView() {
   return `<div class="page-stack"><div class="section-heading"><div><h2>E-posta kayıtları</h2><p>Sistemden gönderilen mail hareketleri</p></div></div><section class="panel"><div class="panel-heading"><h3>Son 100 kayıt</h3><span class="status blue">${state.emailLogs.length} kayıt</span></div>${rows || '<div class="empty-state">Henüz e-posta kaydı bulunmuyor.</div>'}</section></div>`;
 }
 
-const views = { dashboard: dashboardView, schools: schoolsView, settings: settingsView, subscriptions: subscriptionsView, applications: applicationsView, subscriptionPayments: subscriptionPaymentsView, emailLogs: emailLogsView, onboarding: onboardingView, bankSettings: bankSettingsView, subscriptionBankSettings: subscriptionBankSettingsView, students: studentsView, studentSettings: studentSettingsView, studentProfile: studentProfileView, studentAttendanceHistory: studentAttendanceHistoryView, child: studentProfileView, trainings: trainingsView, trainingSettings: trainingSettingsView, attendance: attendanceView, fees: feesView, parentPayment: parentPaymentView, parentBankTransfer: parentBankTransferView, parentCardPayment: parentCardPaymentView, accounting: accountingView, accountingSettings: accountingSettingsView, accountingEntries: accountingEntriesView, userApprovals: userApprovalsView, notifications: notificationsView };
+const views = { dashboard: dashboardView, schools: schoolsView, settings: settingsView, subscriptions: subscriptionsView, applications: applicationsView, subscriptionPayments: subscriptionPaymentsView, emailLogs: emailLogsView, help: helpView, onboarding: onboardingView, bankSettings: bankSettingsView, subscriptionBankSettings: subscriptionBankSettingsView, students: studentsView, studentSettings: studentSettingsView, studentProfile: studentProfileView, studentAttendanceHistory: studentAttendanceHistoryView, child: studentProfileView, trainings: trainingsView, trainingSettings: trainingSettingsView, attendance: attendanceView, fees: feesView, parentPayment: parentPaymentView, parentBankTransfer: parentBankTransferView, parentCardPayment: parentCardPaymentView, accounting: accountingView, accountingSettings: accountingSettingsView, accountingEntries: accountingEntriesView, userApprovals: userApprovalsView, notifications: notificationsView };
 
 function captureNotificationDraftFromDom() {
   if (skipNextNotificationDraftCapture) {
@@ -2755,7 +2772,7 @@ function mapNotificationRows(rows, reads) {
     const timestamp = row.sent_at || row.created_at;
     return {
       id: Number(row.id), date: notificationDate(timestamp), title: row.title, body: row.body,
-      audience: row.audience, sentBy: row.sent_by,
+      audience: row.audience, sentBy: row.sent_by, senderLabel: row.sender_label || '',
       time: new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' }).format(new Date(timestamp)),
       status: row.status === 'sent' ? 'Teslim edildi' : row.status === 'failed' || (row.status === 'queued' && Date.now() - new Date(timestamp).getTime() > 120000) ? 'Başarısız' : row.status === 'queued' ? 'Sırada' : 'Taslak',
       recipientCount: row.recipient_count === null ? null : Number(row.recipient_count),
@@ -3660,6 +3677,7 @@ async function saveAndSendNotification({ audience, title, body, studentId = null
     body: normalizedBody,
     audience: normalizedAudience,
     sentBy: state.userId,
+    senderLabel: state.role === 'super_admin' ? 'SASA-F' : (state.schoolName || 'Okul'),
     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     status: 'Sırada'
   };
@@ -3680,6 +3698,7 @@ async function saveAndSendNotification({ audience, title, body, studentId = null
     });
     if (pushError) throw pushError;
     notification.id = Number(pushResult.notificationId);
+    notification.senderLabel = pushResult.senderLabel || notification.senderLabel;
     notification.status = pushResult.sent > 0 ? 'Teslim edildi' : 'Başarısız';
     notification.recipientCount = Number(pushResult.recipients || 0);
     notification.deliveredCount = Number(pushResult.sent || 0);
@@ -3708,6 +3727,7 @@ async function createTrainingAndSendNotification(training) {
     body: `${formatTrainingDateLong(training.date)} saat ${training.time}’de ${training.title} antrenmanı yapılacaktır.`,
     audience: `${training.group} velileri`,
     sentBy: state.userId,
+    senderLabel: state.role === 'super_admin' ? 'SASA-F' : (state.schoolName || 'Okul'),
     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     status: Number(result.sent || 0) > 0 ? 'Teslim edildi' : 'Başarısız',
     recipientCount: Number(result.recipients || 0),

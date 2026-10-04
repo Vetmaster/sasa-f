@@ -216,6 +216,19 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 .settings-hub-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .settings-link-card { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 20px; color: var(--ink); text-align: left; cursor: pointer; }
 .settings-link-card:hover { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(57,117,143,.1), var(--shadow); }
+.settings-help-icon { display: grid; place-items: center; font-size: 20px; font-weight: 900; }
+.help-topic-list { display: grid; gap: 12px; }
+.help-topic-card { overflow: hidden; }
+.help-topic-card > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; list-style: none; font-weight: 800; }
+.help-topic-card > summary::-webkit-details-marker { display: none; }
+.help-topic-card > summary .disclosure-chevron { color: var(--brand); transition: transform .2s ease; }
+.help-topic-card[open] > summary { border-bottom: 1px solid var(--line); }
+.help-topic-card[open] > summary .disclosure-chevron { transform: rotate(180deg); }
+.help-topic-content { display: grid; gap: 14px; padding: 18px 20px 20px; }
+.help-topic-content p { margin: 0; color: var(--muted); line-height: 1.55; }
+.help-video-placeholder { min-height: 150px; display: grid; place-items: center; align-content: center; gap: 7px; padding: 22px; border: 1px dashed rgba(57,117,143,.42); border-radius: 14px; color: var(--brand-dark); background: rgba(57,117,143,.06); text-align: center; }
+.help-video-placeholder > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--brand); }
+.help-video-placeholder small { color: var(--muted); }
 .settings-link-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: white; background: var(--brand); }
 .settings-link-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .settings-link-copy { min-width: 0; display: grid; gap: 5px; }

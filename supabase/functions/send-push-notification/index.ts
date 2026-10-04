@@ -84,11 +84,12 @@ Deno.serve(async request => {
   const targetSchoolId = requestedSchoolId;
   const { data: targetSchool } = await admin
     .from('schools')
-    .select('id, is_active')
+    .select('id, name, is_active')
     .eq('id', targetSchoolId)
     .maybeSingle();
   if (!targetSchool) return json({ error: 'School not found' }, 404);
   if (targetSchool.is_active === false) return json({ error: 'School is inactive' }, 409);
+  const senderLabel = isPlatformSuperAdmin ? 'SASA-F' : String(targetSchool.name || 'Okul');
   const requestedRecipientIds = Array.isArray(body.recipientUserIds)
     ? [...new Set(body.recipientUserIds.map((value: unknown) => String(value || '').trim()).filter(Boolean))].slice(0, 50)
     : [];
@@ -153,7 +154,8 @@ Deno.serve(async request => {
         title: `${group.name} grubu · Yeni antrenman`,
         body: `${formattedDate} saat ${startTime.slice(0, 5)}’de ${title} antrenmanı yapılacaktır.`,
         status: 'queued',
-        sent_by: callerUserId
+        sent_by: callerUserId,
+        sender_label: senderLabel
       })
       .select('id')
       .single();
@@ -189,7 +191,8 @@ Deno.serve(async request => {
         title,
         body: notificationBody,
         status: 'queued',
-        sent_by: callerUserId
+        sent_by: callerUserId,
+        sender_label: senderLabel
       })
       .select('id')
       .single();
@@ -473,5 +476,5 @@ Deno.serve(async request => {
     delivered_count: sent
   }).eq('id', notification.id);
 
-  return json({ trainingId, notificationId: notification.id, sent, failed, recipients: recipientIds.length });
+  return json({ trainingId, notificationId: notification.id, senderLabel, sent, failed, recipients: recipientIds.length });
 });

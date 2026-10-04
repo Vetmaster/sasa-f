@@ -490,7 +490,7 @@
     async function loadNotifications() {
       requireContext();
       const [notificationsResult, readsResult] = await Promise.all([
-        client.from('notifications').select('id, audience, title, body, status, sent_by, sent_at, created_at, recipient_count, delivered_count, read_count').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(100),
+        client.from('notifications').select('id, audience, title, body, status, sent_by, sender_label, sent_at, created_at, recipient_count, delivered_count, read_count').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(100),
         client.from('notification_reads').select('notification_id, read_at').eq('user_id', userId).order('notification_id')
       ]);
       if (notificationsResult.error) throw notificationsResult.error;
