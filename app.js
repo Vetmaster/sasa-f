@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.04.514';
+const APP_VERSION = '2026.10.04.515';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1992,7 +1992,7 @@ function feesView() {
   const collected = allStudents.filter(student => currentFeeStatus(student) === 'paid').reduce((sum, student) => sum + monthlyFeeAmount(student, currentMonth), 0);
   const pending = pendingStudents.reduce((sum, student) => sum + monthlyFeeAmount(student, currentMonth), 0);
   const title = state.feeFilter === 'pending' && !isParent ? 'Ödemesi yapılmamış öğrenciler' : isParent ? 'Aidat bilgilerim' : 'Aidat takip listesi';
-  const headerAction = state.feeFilter === 'pending' && !isParent ? '<button class="secondary-button" data-action="fee-filter" data-filter="all">Tüm aidatları göster</button>' : !isParent ? '<button class="primary-button" data-action="collect-fee">+ Aidat tanımla</button>' : '';
+  const headerAction = state.feeFilter !== 'pending' && !isParent ? '<button class="primary-button" data-action="collect-fee">+ Aidat tanımla</button>' : '';
   const summaryMarkup = isParent
     ? `<section class="stats-grid"><article class="stat-card parent-fee-card"><span class="label">Aidat durumu</span><strong>${parentDebtBalance ? `${formatCurrency(parentDebtBalance)} borç bakiyesi` : 'Aidat borcunuz yoktur.'}</strong><small>${parentDebtBalance ? `${parentUnpaidMonths.length} ödenmemiş dönem` : 'Ödenmemiş aidat bulunmuyor'}</small></article></section>`
     : `<section class="stats-grid"><article class="stat-card"><span class="label">Aylık tahakkuk</span><strong>${formatCurrency(total)}</strong><small>${currentMonthLabel}</small></article><article class="stat-card"><span class="label">Tahsil edilen</span><strong>${formatCurrency(collected)}</strong><small>${total ? `%${Math.round(collected / total * 100)} tahsilat` : '%0 tahsilat'}</small></article><article class="stat-card"><span class="label">Bekleyen</span><strong>${formatCurrency(pending)}</strong><small>${pendingStudents.length} öğrenci</small></article></section>`;
@@ -5232,7 +5232,6 @@ document.addEventListener('click', async event => {
   else if (action === 'pending-fees') navigateToPage('fees', { feeFilter: 'pending' });
   else if (action === 'scroll-profile-fees') document.querySelector('#monthlyFeeSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   else if (action === 'toggle-student-timeline') { const studentId = Number(actionButton.dataset.id); state.expandedTimelineStudentId = Number(state.expandedTimelineStudentId) === studentId ? null : studentId; render(); }
-  else if (action === 'fee-filter') { state.feeFilter = actionButton.dataset.filter || 'all'; render(); }
   else if (action === 'dismiss-dashboard-notifications') {
     window.localStorage.setItem(PUSH_PROMPT_DISMISS_STORAGE_KEY, '1');
     render();
