@@ -153,7 +153,7 @@ Deno.serve(async request => {
         title: `${group.name} grubu · Yeni antrenman`,
         body: `${formattedDate} saat ${startTime.slice(0, 5)}’de ${title} antrenmanı yapılacaktır.`,
         status: 'queued',
-        sent_by: callerUserId
+        sent_by: isPlatformSuperAdmin ? null : callerUserId
       })
       .select('id')
       .single();
@@ -189,7 +189,7 @@ Deno.serve(async request => {
         title,
         body: notificationBody,
         status: 'queued',
-        sent_by: callerUserId
+        sent_by: isPlatformSuperAdmin ? null : callerUserId
       })
       .select('id')
       .single();
