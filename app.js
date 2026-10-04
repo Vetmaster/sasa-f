@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.09.29.513';
+const APP_VERSION = '2026.10.04.514';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -8,6 +8,7 @@ const ANDROID_APP_SEEN_MAX_AGE_MS = 45 * 24 * 60 * 60 * 1000;
 const PUSH_PREFERENCE_STORAGE_KEY = 'sasa_phone_notifications';
 const PUSH_PROMPT_DISMISS_STORAGE_KEY = 'sasa_push_prompt_dismissed_v1';
 const ACCESS_REQUEST_CACHE_PREFIX = 'sasa_access_requests_cache_v1';
+const MAX_STUDENT_PROFILE_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
 const ANDROID_PACKAGE_ID = 'com.sasafutbol.yonetim';
 const SUPABASE_URL = 'https://tezeflsiljqprrqbsypl.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_b8NKvXEXTLAOz2o1L8XN9w_QQVuMUJx';
@@ -4151,7 +4152,7 @@ function resetStudentPhotoEditor() {
 async function prepareStudentPhoto(file) {
   const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
   if (file.type && !allowedTypes.has(file.type)) throw new Error('Fotoğraf JPEG, PNG veya WebP biçiminde olmalıdır.');
-  if (file.size > 10 * 1024 * 1024) throw new Error('Fotoğrafın boyutu 10 MB’tan küçük olmalıdır.');
+  if (file.size > MAX_STUDENT_PROFILE_PHOTO_SIZE_BYTES) throw new Error('Fotoğrafın boyutu 5 MB’tan küçük olmalıdır.');
   const sourceUrl = URL.createObjectURL(file);
   try {
     const image = new Image();
@@ -5685,10 +5686,10 @@ document.querySelector('#studentForm').addEventListener('input', event => {
 function handleStudentPhotoSelection(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  if ((file.type && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) || file.size > 10 * 1024 * 1024) {
+  if ((file.type && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) || file.size > MAX_STUDENT_PROFILE_PHOTO_SIZE_BYTES) {
     event.target.value = '';
-    showToast(file.size > 10 * 1024 * 1024
-      ? 'Fotoğrafın boyutu 10 MB’tan küçük olmalıdır.'
+    showToast(file.size > MAX_STUDENT_PROFILE_PHOTO_SIZE_BYTES
+      ? 'Fotoğrafın boyutu 5 MB’tan küçük olmalıdır.'
       : 'Fotoğraf JPEG, PNG veya WebP biçiminde olmalıdır.');
     return;
   }
