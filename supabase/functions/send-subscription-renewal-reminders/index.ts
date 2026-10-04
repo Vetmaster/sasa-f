@@ -2,12 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleAuth } from 'google-auth-library';
 import nodemailer from 'nodemailer';
 import webpush from 'web-push';
+import { corsHeadersForRequest, handleCorsPreflight } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-cron-secret',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+const CRON_ALLOWED_HEADERS = 'authorization, apikey, content-type, x-client-info, x-cron-secret';
 
 const PUSH_TIMEOUT_MS = 12000;
 const SITE_URL = 'https://sasa-f.com/';
@@ -34,7 +31,7 @@ type AuthUser = {
   user_metadata?: { full_name?: string };
 };
 
-function json(body: unknown, status = 200) {
+function jsonWithCors(body: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -302,7 +299,10 @@ async function sendPushes(
 }
 
 Deno.serve(async request => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const preflightResponse = handleCorsPreflight(request, CRON_ALLOWED_HEADERS);
+  if (preflightResponse) return preflightResponse;
+  const corsHeaders = corsHeadersForRequest(request, CRON_ALLOWED_HEADERS);
+  const json = (body: unknown, status = 200) => jsonWithCors(body, status, corsHeaders);
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const body = await request.json().catch(() => ({}));

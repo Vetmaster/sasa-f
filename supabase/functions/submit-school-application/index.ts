@@ -1,12 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { corsHeadersForRequest, handleCorsPreflight } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
-
-function response(body: unknown, status = 200) {
+function responseWithCors(body: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
@@ -40,7 +35,10 @@ async function sha256Hex(value: string) {
 }
 
 Deno.serve(async request => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const preflightResponse = handleCorsPreflight(request);
+  if (preflightResponse) return preflightResponse;
+  const corsHeaders = corsHeadersForRequest(request);
+  const response = (body: unknown, status = 200) => responseWithCors(body, status, corsHeaders);
   if (request.method !== 'POST') return response({ error: 'Method not allowed' }, 405);
   const url = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');

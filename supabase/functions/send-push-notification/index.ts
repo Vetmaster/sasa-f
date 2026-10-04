@@ -1,16 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { GoogleAuth } from 'npm:google-auth-library@9.15.1';
 import webpush from 'web-push';
+import { corsHeadersForRequest, handleCorsPreflight } from '../_shared/cors.ts';
 
 const PUSH_TIMEOUT_MS = 12000;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
-
-function json(body: unknown, status = 200) {
+function jsonWithCors(body: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -18,7 +13,10 @@ function json(body: unknown, status = 200) {
 }
 
 Deno.serve(async request => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const preflightResponse = handleCorsPreflight(request);
+  if (preflightResponse) return preflightResponse;
+  const corsHeaders = corsHeadersForRequest(request);
+  const json = (body: unknown, status = 200) => jsonWithCors(body, status, corsHeaders);
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const body = await request.json().catch(() => ({}));

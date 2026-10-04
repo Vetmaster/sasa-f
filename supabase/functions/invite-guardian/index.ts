@@ -1,14 +1,9 @@
 import { createClient, type User } from '@supabase/supabase-js';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+import { corsHeadersForRequest, handleCorsPreflight } from '../_shared/cors.ts';
 
 const inviteRedirectUrl = 'https://sasa-f.com/';
 
-function json(body: unknown, status = 200) {
+function jsonWithCors(body: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -47,7 +42,10 @@ async function logEmail(admin: ReturnType<typeof createClient>, entry: Record<st
 }
 
 Deno.serve(async request => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const preflightResponse = handleCorsPreflight(request);
+  if (preflightResponse) return preflightResponse;
+  const corsHeaders = corsHeadersForRequest(request);
+  const json = (body: unknown, status = 200) => jsonWithCors(body, status, corsHeaders);
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
