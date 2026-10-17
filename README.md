@@ -46,3 +46,7 @@ Antrenör rolü yalnızca güvenli öğrenci dizinine, antrenmanlara ve yoklama 
 Proje GitHub deposunun kök dizinine gönderildiğinde `.github/workflows/pages.yml` iş akışı web sürümünü GitHub Pages'a yayınlamaya hazırdır. Depo ayarlarında **Settings → Pages → Source: GitHub Actions** seçilmelidir.
 
 GitHub Pages yalnızca web arayüzünü sunar; Supabase veri izolasyonu ve Firebase Cloud Messaging mevcut merkezi altyapıda çalışır.
+
+## Kart açılışı
+
+Açılan kartlar ve yeni sayfalar sabit banner/başlık altına hizalanır. Filtreleme, veri yenilemesi ve kapatma mevcut kaydırma konumunu korur; form girişlerine otomatik odak verilmez.

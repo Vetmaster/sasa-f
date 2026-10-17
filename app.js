@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.17.523';
+const APP_VERSION = '2026.10.17.524';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -2400,7 +2400,26 @@ function captureNotificationDraftFromDom() {
   };
 }
 
+// Align an opened card below the headers that remain fixed while scrolling.
+function revealCard(element, {focus = false} = {}) {
+  if (!element) return;
+  if (focus) { element.tabIndex = -1; element.focus({preventScroll: true}); }
+  requestAnimationFrame(() => {
+    if (!element.isConnected || !element.getClientRects().length) return;
+    let offset = 0;
+    for (const header of document.querySelectorAll('.app-banner, .topbar')) {
+      const style = getComputedStyle(header);
+      if (!['sticky', 'fixed'].includes(style.position) || style.top === 'auto') continue;
+      offset = Math.max(offset, parseFloat(style.top) + header.getBoundingClientRect().height);
+    }
+    window.scrollTo({top: Math.max(0, window.scrollY + element.getBoundingClientRect().top - offset - 12), behavior: 'instant'});
+  });
+}
+// Only deliberate page changes reset the viewport; filtering/realtime keep their position.
+let lastRenderedPage;
 function render() {
+  const previousPage = lastRenderedPage;
+
   captureNotificationDraftFromDom();
   if (!navItems[state.page]?.roles.includes(state.role)) state.page = 'dashboard';
   state.page = subscriptionGatePage(state.page);
@@ -2442,6 +2461,8 @@ function render() {
   document.querySelector('.user-avatar').textContent = initials(state.userFullName || state.userEmail || 'SF');
   setSafeHtml(appContent, views[state.page]());
   appContent.focus({ preventScroll: true });
+  lastRenderedPage = state.page;
+  if (previousPage !== state.page) revealCard(appContent.firstElementChild);
 }
 
 function patchVisiblePageFromRealtime() {
@@ -6417,6 +6438,17 @@ document.querySelector('#studentNotificationForm')?.addEventListener('submit', a
   } catch (error) {
     showToast(`Bildirim gönderilemedi: ${error.message || 'Bağlantı hatası'}`);
   }
+});
+
+// A click also covers keyboard activation of a summary. Initial render/refresh
+// toggle events must not move the page or focus an input.
+appContent.addEventListener('click', event => {
+  const summary = event.target.closest('summary');
+  if (!summary || !appContent.contains(summary)) return;
+  const details = summary.parentElement;
+  requestAnimationFrame(() => {
+    if (details.open && details.isConnected) revealCard(details.closest('.panel') || details);
+  });
 });
 
 appContent.addEventListener('toggle', event => {
