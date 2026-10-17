@@ -229,6 +229,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 .legal-preview-intro { padding: 18px 20px; }
 .legal-preview-intro p { margin: 6px 0 0; color: var(--muted); line-height: 1.55; }
 .legal-preview-list { display: grid; gap: 12px; }
+.legal-document-disclosure > summary h3 { min-width: 0; overflow-wrap: anywhere; }
+.legal-document-disclosure > summary .status { white-space: nowrap; }
+.legal-document-summary { padding-bottom: 14px; border-bottom: 1px solid var(--line); color: var(--ink) !important; font-weight: 700; }
 .legal-document-card { overflow: hidden; }
 .legal-document-card > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; list-style: none; }
 .legal-document-card > summary::-webkit-details-marker { display: none; }
