@@ -234,6 +234,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 .legal-document-card > summary::-webkit-details-marker { display: none; }
 .legal-document-card > summary span:first-child { display: grid; gap: 5px; }
 .legal-document-card > summary small { color: var(--muted); font-weight: 500; line-height: 1.45; }
+.legal-document-toggle { display: inline-flex; align-items: center; gap: 7px; color: var(--brand); font-size: 12px; font-weight: 800; }
+.legal-toggle-close { display: none; }
+.legal-document-card[open] .legal-toggle-open { display: none; }
+.legal-document-card[open] .legal-toggle-close { display: inline; }
 .legal-document-card > summary .disclosure-chevron { color: var(--brand); transition: transform .2s ease; }
 .legal-document-card[open] > summary { border-bottom: 1px solid var(--line); }
 .legal-document-card[open] > summary .disclosure-chevron { transform: rotate(180deg); }
