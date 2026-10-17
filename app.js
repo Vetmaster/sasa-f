@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.17.522';
+const APP_VERSION = '2026.10.17.523';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1611,7 +1611,7 @@ const LEGAL_DOCUMENTS = [
   },
   {
     title: 'Gizlilik Politikası',
-    summary: 'SASA-F’nin kullanıcı ve okul verilerini nasıl koruduğunu kullanıcı dostu bir dille anlatır.',
+    summary: 'SASA-F’nin kullanıcı ve okul verilerini nasıl koruduğunu anlatır.',
     content: `<p>SASA-F, kullanıcı bilgilerinin yalnızca hizmetin sunulması için gerekli olduğu ölçüde toplanmasını ve korunmasını esas alır.</p><h3>Güvenlik</h3><p>Hesap erişimleri yetki seviyelerine göre sınırlandırılır. Okullar yalnızca kendi öğrenci, veli, antrenman ve mali kayıtlarına erişebilir. Hassas işlemler kimlik doğrulama ve rol kontrolleriyle korunur.</p><h3>Saklama</h3><p>Veriler, hizmet ilişkisi ve yasal yükümlülükler devam ettiği sürece saklanır; saklama amacı sona erdiğinde silinir, yok edilir veya anonim hale getirilir.</p><h3>Hizmet sağlayıcılar</h3><p>Uygulama altyapısında veritabanı, dosya depolama, e-posta gönderimi ve anlık bildirim hizmetleri kullanılabilir. Bu sağlayıcılarla yalnızca hizmet için gereken bilgiler paylaşılır.</p>`
   },
   {
