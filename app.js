@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.17.517';
+const APP_VERSION = '2026.10.17.518';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1647,7 +1647,7 @@ const LEGAL_DOCUMENTS = [
 ];
 
 function legalTextsView() {
-  const cards = LEGAL_DOCUMENTS.map((document, index) => `<details class="panel legal-document-card" ${index === 0 ? 'open' : ''}><summary><span><strong>${escapeHtml(document.title)}</strong><small>${escapeHtml(document.summary)}</small></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><article class="legal-document-body">${document.content}</article></details>`).join('');
+  const cards = LEGAL_DOCUMENTS.map(document => `<details class="panel legal-document-card" open><summary><span><strong>${escapeHtml(document.title)}</strong><small>${escapeHtml(document.summary)}</small></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><article class="legal-document-body">${document.content}</article></details>`).join('');
   return `<div class="page-stack legal-texts-page"><div class="section-heading"><div><h2>Yasal Metinler</h2><p>Hazırlanan metinleri yayına almadan önce inceleyin</p></div></div><section class="panel legal-preview-intro"><strong>Yalnızca Süper Admin önizlemesi</strong><p>Bu metinler şu anda giriş, başvuru, abonelik veya diğer kullanıcı ekranlarında gösterilmez.</p></section><section class="legal-preview-list" aria-label="Yasal metin önizlemeleri">${cards}</section></div>`;
 }
 
