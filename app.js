@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.17.520';
+const APP_VERSION = '2026.10.17.521';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -6781,8 +6781,14 @@ appContent.addEventListener('submit', async event => {
 });
 
 appContent.addEventListener('toggle', event => {
-  if (!event.target.matches('.notification-compose-disclosure')) return;
-  state.notificationComposeOpen = event.target.open;
+  if (event.target.matches('.legal-document-disclosure')) {
+    if (!event.target.open) return;
+    appContent.querySelectorAll('.legal-document-disclosure[open]').forEach(disclosure => {
+      if (disclosure !== event.target) disclosure.open = false;
+    });
+    return;
+  }
+  if (event.target.matches('.notification-compose-disclosure')) state.notificationComposeOpen = event.target.open;
 }, true);
 
 async function handleAuthStateChange(event, session) {
