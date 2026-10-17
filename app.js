@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.04.516';
+const APP_VERSION = '2026.10.17.517';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -309,6 +309,7 @@ const navItems = {
   subscriptionPayments: { label: 'Ödemeler', icon: MENU_ICONS.subscriptions, roles: ['super_admin'] },
   emailLogs: { label: 'E-posta Kayıtları', icon: '✉', roles: ['super_admin'], hidden: true },
   help: { label: 'Yardım', icon: '?', roles: ['super_admin', 'admin'], hidden: true },
+  legalTexts: { label: 'Yasal Metinler', icon: '§', roles: ['super_admin'], hidden: true },
   onboarding: { label: 'Aboneliği başlat', icon: MENU_ICONS.subscriptions, roles: ['admin'], hidden: true },
   bankSettings: { label: 'Aidat Havale Bilgileri', icon: MENU_ICONS.bank, roles: ['super_admin', 'admin'], hidden: true },
   subscriptionBankSettings: { label: 'Abonelik Havale Bilgileri', icon: MENU_ICONS.bank, roles: ['super_admin'], hidden: true },
@@ -335,7 +336,7 @@ const roleNames = { super_admin: 'Süper Admin', admin: 'Admin', coach: 'Antren�
 const pageMeta = {
   dashboard: ['Genel Bakış', 'Kulübün bugünkü durumu'], schools: ['Okullar', 'Tüm futbol okullarını tek ekrandan yönetin'], settings: ['Ayarlar', 'Okul ve abonelik ayarları'], subscriptions: ['Abonelikler', 'Okulların abonelik durumları'], applications: ['Başvurular', 'Yeni müşteri başvurularını inceleyin'], subscriptionPayments: ['Ödemeler', 'Abonelik ödeme bildirimlerini onaylayın'], onboarding: ['Aboneliğinizi başlatın', 'Deneme hesabı veya satın alma seçin'], bankSettings: ['Aidat Havale Bilgileri', 'Velilere gösterilecek banka hesabı'], subscriptionBankSettings: ['Abonelik Havale Bilgileri', 'Okul yöneticilerinin abonelik ödemesinde göreceği hesaplar'], students: ['Öğrenciler', 'Kayıtlar ve öğrenci profilleri'], studentSettings: ['Öğrenci Ayarları', 'Antrenman gruplarını yönetin'], studentProfile: ['Öğrenci Profili', 'Öğrenci bilgileri ve antrenman durumu'], studentAttendanceHistory: ['Öğrenci Yoklamaları', 'Geldiği ve gelmediği antrenmanlar'], child: ['Öğrenci', 'Öğrenci profili ve güncel durum'],
   trainings: ['Antrenman', 'Antrenman takvimi ve gruplar'], trainingSettings: ['Antrenman Ayarları', 'Antrenman isimlerini ve antrenörleri yönetin'], attendance: ['Yoklama', 'Antrenman katılım takibi'], fees: ['Aidat', 'Aylık ödeme ve tahsilat takibi'], parentPayment: ['Ödeme Yap', 'Aidat ödeme yöntemini seçin'], parentBankTransfer: ['Aidat Havale Bilgileri', 'Kulübün banka hesabı bilgileri'], parentCardPayment: ['Kartla Ödeme', 'Güvenli ödeme önizlemesi'],
-  accounting: ['Muhasebe', 'Temel gelir ve gider takibi'], accountingSettings: ['Muhasebe Ayarları', 'Aylık aidat tutarı ve tahakkuk ayarları'], accountingEntries: ['Son İşlemler', 'Tüm gelir ve gider kayıtları'], userApprovals: ['Kullanıcı Onayları', 'Yeni kullanıcıların erişim talepleri'], emailLogs: ['E-posta Kayıtları', 'Sistemden gönderilen mail işlemleri'], help: ['Yardım', 'Kullanım videoları ve sık sorulan sorular'], notifications: ['Bildirimler', 'Duyurular ve gönderim merkezi']
+  accounting: ['Muhasebe', 'Temel gelir ve gider takibi'], accountingSettings: ['Muhasebe Ayarları', 'Aylık aidat tutarı ve tahakkuk ayarları'], accountingEntries: ['Son İşlemler', 'Tüm gelir ve gider kayıtları'], userApprovals: ['Kullanıcı Onayları', 'Yeni kullanıcıların erişim talepleri'], emailLogs: ['E-posta Kayıtları', 'Sistemden gönderilen mail işlemleri'], help: ['Yardım', 'Kullanım videoları ve sık sorulan sorular'], legalTexts: ['Yasal Metinler', 'Uygulamada kullanılacak yasal metinlerin önizlemesi'], notifications: ['Bildirimler', 'Duyurular ve gönderim merkezi']
 };
 
 function persistNavigationState() {
@@ -1582,6 +1583,11 @@ function settingsView() {
         <span class="settings-link-copy"><strong>Yardım</strong><small>Kullanım videolarını ve sık sorulan soruları görüntüleyin.</small></span>
         <span class="settings-link-arrow" aria-hidden="true">›</span>
       </button>
+      ${state.role === 'super_admin' ? `<button class="panel settings-link-card" type="button" data-page="legalTexts">
+        <span class="settings-link-icon" aria-hidden="true">§</span>
+        <span class="settings-link-copy"><strong>Yasal Metinler</strong><small>Hazırlanan yasal metinlerin görünümünü inceleyin.</small></span>
+        <span class="settings-link-arrow" aria-hidden="true">›</span>
+      </button>` : ''}
     </section>
   </div>`;
 }
@@ -1595,6 +1601,54 @@ function helpView() {
   ];
   const cards = topics.map(([question, description]) => `<details class="panel help-topic-card"><summary><span>${escapeHtml(question)}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><div class="help-topic-content"><p>${escapeHtml(description)}</p><div class="help-video-placeholder"><span aria-hidden="true">▶</span><strong>Kullanım videosu</strong><small>Video bağlantısı eklendiğinde burada izlenebilecek.</small></div></div></details>`).join('');
   return `<div class="page-stack"><div class="section-heading"><div><h2>Yardım</h2><p>Merak ettiğiniz konuyu açarak kullanım videosuna ulaşabilirsiniz.</p></div></div><section class="help-topic-list" aria-label="Yardım konuları">${cards}</section></div>`;
+}
+
+const LEGAL_DOCUMENTS = [
+  {
+    title: 'KVKK Aydınlatma Metni',
+    summary: 'Kişisel verilerin hangi amaçlarla ve hangi hukuki sebeplerle işlendiğini açıklar.',
+    content: `<h3>Veri sorumlusu</h3><p>SASA-F hizmetinin veri sorumlusu şahıs işletmesi sahibi <strong>Hasan Sargın</strong>'dır. İletişim adresi: <strong>Fenerbahçe Mah. İğrip Sk. Kapı No: 13, Daire No: 1, Kadıköy/İstanbul</strong>. E-posta: <strong>bilgi@sasa-f.com</strong>.</p><h3>İşlenen kişisel veriler</h3><p>Kimlik ve iletişim bilgileri, kullanıcı hesabı bilgileri, öğrenci ve veli kayıtları, profil fotoğrafları, antrenman ve yoklama kayıtları, aidat ve muhasebe hareketleri, bildirim tercihleri ile güvenlik kayıtları işlenebilir.</p><h3>İşleme amaçları ve aktarım</h3><p>Veriler; üyelik oluşturma, futbol okulu operasyonlarını yürütme, ödeme ve abonelik takibi, güvenlik, destek ve yasal yükümlülüklerin yerine getirilmesi amaçlarıyla işlenir. Hizmetin sağlanması için barındırma, e-posta ve bildirim altyapısı sağlayıcılarıyla gerekli ölçüde paylaşılabilir.</p><h3>Haklarınız</h3><p>6698 sayılı Kanun kapsamındaki haklarınız için bilgi@sasa-f.com adresine başvurabilirsiniz.</p>`
+  },
+  {
+    title: 'Gizlilik Politikası',
+    summary: 'SASA-F’nin kullanıcı ve okul verilerini nasıl koruduğunu kullanıcı dostu bir dille anlatır.',
+    content: `<p>SASA-F, kullanıcı bilgilerinin yalnızca hizmetin sunulması için gerekli olduğu ölçüde toplanmasını ve korunmasını esas alır.</p><h3>Güvenlik</h3><p>Hesap erişimleri yetki seviyelerine göre sınırlandırılır. Okullar yalnızca kendi öğrenci, veli, antrenman ve mali kayıtlarına erişebilir. Hassas işlemler kimlik doğrulama ve rol kontrolleriyle korunur.</p><h3>Saklama</h3><p>Veriler, hizmet ilişkisi ve yasal yükümlülükler devam ettiği sürece saklanır; saklama amacı sona erdiğinde silinir, yok edilir veya anonim hale getirilir.</p><h3>Hizmet sağlayıcılar</h3><p>Uygulama altyapısında veritabanı, dosya depolama, e-posta gönderimi ve anlık bildirim hizmetleri kullanılabilir. Bu sağlayıcılarla yalnızca hizmet için gereken bilgiler paylaşılır.</p>`
+  },
+  {
+    title: 'Kullanım ve Üyelik Sözleşmesi',
+    summary: 'Okul yöneticilerinin SASA-F’yi kullanırken sahip olduğu hak ve sorumlulukları düzenler.',
+    content: `<h3>Hizmetin kapsamı</h3><p>SASA-F; futbol okullarının öğrenci, veli, antrenman, yoklama, aidat, muhasebe ve bildirim süreçlerini yönetmesine yardımcı olan çevrim içi bir hizmettir.</p><h3>Kullanıcı sorumlulukları</h3><p>Kullanıcı, verdiği bilgilerin doğru olduğunu; öğrenci ve veli verilerini sisteme eklemek için gerekli yetkiye sahip bulunduğunu ve hesabını üçüncü kişilerle paylaşmayacağını kabul eder.</p><h3>Uygun kullanım</h3><p>Hizmet hukuka aykırı, yanıltıcı, zarar verici veya başka kişilerin haklarını ihlal edecek biçimde kullanılamaz. Güvenliği tehdit eden hesapların erişimi geçici veya kalıcı olarak sınırlandırılabilir.</p><h3>Hizmet sürekliliği</h3><p>Bakım, güvenlik veya teknik nedenlerle hizmette geçici kesintiler yaşanabilir. Planlı çalışmalar mümkün olduğunda önceden bildirilir.</p>`
+  },
+  {
+    title: 'Abonelik, Ödeme ve İptal Koşulları',
+    summary: 'Ücretsiz deneme, ücretli paketler, yenileme ve iptal süreçlerini açıklar.',
+    content: `<h3>Ücretsiz deneme</h3><p>Uygun yeni futbol okulları SASA-F standart üyeliğini 3 ay ücretsiz deneyebilir. Deneme süresi sonunda hizmetin devamı için ücretli abonelik başlatılması gerekir.</p><h3>Ücretli dönemler</h3><p>Bir aylık, üç aylık ve yıllık paketlerin güncel fiyatları satın alma ekranında gösterilir. Havale bildirimi, ödeme onaylanıncaya kadar aboneliği tek başına etkinleştirmez.</p><h3>Süre uzatma</h3><p>Aktif abonelik sırasında onaylanan yeni dönem, mevcut bitiş tarihinin sonuna eklenir. Kullanıcı ödeme incelemedeyken mevcut aktif aboneliğini kullanmaya devam eder.</p><h3>İptal ve iade</h3><p>İptal ve iade talepleri; hizmetin türü, kullanım durumu ve uygulanabilir mevzuat dikkate alınarak değerlendirilir. Talepler bilgi@sasa-f.com üzerinden iletilebilir.</p>`
+  },
+  {
+    title: 'Çerez Politikası',
+    summary: 'Web uygulamasında kullanılan zorunlu depolama ve olası tercih çerezlerini açıklar.',
+    content: `<p>SASA-F; oturumu açık tutmak, güvenliği sağlamak, seçilen okul ve kullanıcı tercihlerini hatırlamak için zorunlu tarayıcı depolama teknolojileri kullanabilir.</p><h3>Zorunlu teknolojiler</h3><p>Kimlik doğrulama, güvenlik ve temel uygulama işlevleri için gerekli kayıtlar hizmetin çalışması amacıyla kullanılır.</p><h3>İsteğe bağlı teknolojiler</h3><p>Analitik veya pazarlama amaçlı teknolojiler eklenirse, bunlar gerekli kullanıcı tercihi alınmadan etkinleştirilmez.</p>`
+  },
+  {
+    title: 'Çocuk, Öğrenci ve Veli Verileri',
+    summary: 'Çocuklara ait kayıtların okullar ve veliler tarafından hangi esaslarla kullanılacağını açıklar.',
+    content: `<p>SASA-F çocuklara ait verilerin korunmasına özel önem verir. Öğrenci bilgileri yalnızca yetkili futbol okulu kullanıcıları ve ilgili veli hesabı tarafından görüntülenebilir.</p><h3>Okulun sorumluluğu</h3><p>Futbol okulu, öğrenci verilerini sisteme aktarmaya yetkili olduğunu, veliye gerekli bilgilendirmeyi yaptığını ve gereken durumlarda geçerli izni aldığını kabul eder.</p><h3>Fotoğraflar</h3><p>Profil fotoğrafları yalnızca öğrenci kaydını tanımayı kolaylaştırmak amacıyla kullanılmalıdır. Tanıtım, reklam veya sosyal medya kullanımı bu kapsamın dışındadır.</p><h3>Veri minimizasyonu</h3><p>Öğrenci hakkında hizmet için gerekli olmayan sağlık, özel nitelikli veya ayrıntılı aile bilgileri sisteme girilmemelidir.</p>`
+  },
+  {
+    title: 'Kişisel Veri İşleme Protokolü',
+    summary: 'SASA-F ile futbol okulu arasındaki veri koruma sorumluluklarının çerçevesini gösterir.',
+    content: `<p>Futbol okulu, kendi öğrenci, veli ve çalışan verilerinin işlenme amaçlarını belirlediği ölçüde veri sorumlusu olarak hareket eder. SASA-F, okul adına sunduğu barındırma ve yönetim hizmetlerinde sözleşmedeki talimatlarla sınırlı biçimde veri işler.</p><h3>Tarafların yükümlülükleri</h3><p>Okul, hukuka uygun veri toplama ve bilgilendirmeden; SASA-F ise uygun teknik ve idari güvenlik tedbirlerinden sorumludur. Yetkisiz erişim veya veri ihlali şüphesinde taraflar gecikmeksizin birbirini bilgilendirir.</p><h3>Hizmet sona erdiğinde</h3><p>Verilerin iadesi, silinmesi veya yasal saklama süresince korunmasına ilişkin yöntem taraflar arasındaki sözleşmeye göre uygulanır.</p>`
+  },
+  {
+    title: 'KVKK Başvurusu ve Hesap Silme',
+    summary: 'Kullanıcıların veri taleplerini ve hesap kapatma isteklerini nasıl ileteceğini gösterir.',
+    content: `<p>Kişisel verileriniz hakkında bilgi almak, verilerinizi düzeltmek, silme talebinde bulunmak veya hesabınızı kapatmak için <strong>bilgi@sasa-f.com</strong> adresine başvurabilirsiniz.</p><h3>Başvuruda bulunması gerekenler</h3><ul><li>Ad ve soyad</li><li>Hesapta kullanılan e-posta adresi</li><li>Bağlı olunan futbol okulu</li><li>Talebin açık açıklaması</li></ul><p>Kimliğin doğrulanması için yalnızca gerekli ek bilgiler istenebilir. Başvurular uygulanabilir yasal süre içinde sonuçlandırılır.</p>`
+  }
+];
+
+function legalTextsView() {
+  const cards = LEGAL_DOCUMENTS.map((document, index) => `<details class="panel legal-document-card" ${index === 0 ? 'open' : ''}><summary><span><strong>${escapeHtml(document.title)}</strong><small>${escapeHtml(document.summary)}</small></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><article class="legal-document-body">${document.content}</article></details>`).join('');
+  return `<div class="page-stack legal-texts-page"><div class="section-heading"><div><h2>Yasal Metinler</h2><p>Hazırlanan metinleri yayına almadan önce inceleyin</p></div></div><section class="panel legal-preview-intro"><strong>Yalnızca Süper Admin önizlemesi</strong><p>Bu metinler şu anda giriş, başvuru, abonelik veya diğer kullanıcı ekranlarında gösterilmez.</p></section><section class="legal-preview-list" aria-label="Yasal metin önizlemeleri">${cards}</section></div>`;
 }
 
 function bankAccountSettingsCardMarkup(account = {}, index = 0, accountCount = 1, isUnsaved = false) {
@@ -2327,7 +2381,7 @@ function emailLogsView() {
   return `<div class="page-stack"><div class="section-heading"><div><h2>E-posta kayıtları</h2><p>Sistemden gönderilen mail hareketleri</p></div></div><section class="panel"><div class="panel-heading"><h3>Son 100 kayıt</h3><span class="status blue">${state.emailLogs.length} kayıt</span></div>${rows || '<div class="empty-state">Henüz e-posta kaydı bulunmuyor.</div>'}</section></div>`;
 }
 
-const views = { dashboard: dashboardView, schools: schoolsView, settings: settingsView, subscriptions: subscriptionsView, applications: applicationsView, subscriptionPayments: subscriptionPaymentsView, emailLogs: emailLogsView, help: helpView, onboarding: onboardingView, bankSettings: bankSettingsView, subscriptionBankSettings: subscriptionBankSettingsView, students: studentsView, studentSettings: studentSettingsView, studentProfile: studentProfileView, studentAttendanceHistory: studentAttendanceHistoryView, child: studentProfileView, trainings: trainingsView, trainingSettings: trainingSettingsView, attendance: attendanceView, fees: feesView, parentPayment: parentPaymentView, parentBankTransfer: parentBankTransferView, parentCardPayment: parentCardPaymentView, accounting: accountingView, accountingSettings: accountingSettingsView, accountingEntries: accountingEntriesView, userApprovals: userApprovalsView, notifications: notificationsView };
+const views = { dashboard: dashboardView, schools: schoolsView, settings: settingsView, subscriptions: subscriptionsView, applications: applicationsView, subscriptionPayments: subscriptionPaymentsView, emailLogs: emailLogsView, help: helpView, legalTexts: legalTextsView, onboarding: onboardingView, bankSettings: bankSettingsView, subscriptionBankSettings: subscriptionBankSettingsView, students: studentsView, studentSettings: studentSettingsView, studentProfile: studentProfileView, studentAttendanceHistory: studentAttendanceHistoryView, child: studentProfileView, trainings: trainingsView, trainingSettings: trainingSettingsView, attendance: attendanceView, fees: feesView, parentPayment: parentPaymentView, parentBankTransfer: parentBankTransferView, parentCardPayment: parentCardPaymentView, accounting: accountingView, accountingSettings: accountingSettingsView, accountingEntries: accountingEntriesView, userApprovals: userApprovalsView, notifications: notificationsView };
 
 function captureNotificationDraftFromDom() {
   if (skipNextNotificationDraftCapture) {
