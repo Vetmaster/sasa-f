@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
 
           deploy_dir="${RUNNER_TEMP}/sasa-f-pages"
-          mkdir -p "${deploy_dir}/.well-known"
+          mkdir -p "${deploy_dir}/.well-known" "${deploy_dir}/tutorials"
 
           web_files=(
             .nojekyll
@@ -56,6 +56,8 @@ jobs:
             install -m 0644 "${file}" "${deploy_dir}/${file}"
           done
           install -m 0644 .well-known/assetlinks.json "${deploy_dir}/.well-known/assetlinks.json"
+          install -m 0644 tutorials/school-application-guide.mp4 "${deploy_dir}/tutorials/school-application-guide.mp4"
+          install -m 0644 tutorials/password-setup-guide.mp4 "${deploy_dir}/tutorials/password-setup-guide.mp4"
 
           echo "Prepared GitHub Pages artifact:"
           find "${deploy_dir}" -type f -print | sed "s#${deploy_dir}/##" | sort
@@ -93,6 +95,8 @@ jobs:
           test -f "${deploy_dir}/styles.css"
           test -f "${deploy_dir}/manifest.webmanifest"
           test -f "${deploy_dir}/service-worker.js"
+          test -f "${deploy_dir}/tutorials/school-application-guide.mp4"
+          test -f "${deploy_dir}/tutorials/password-setup-guide.mp4"
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

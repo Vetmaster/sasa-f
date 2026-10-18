@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.17.523';
+const APP_VERSION = '2026.10.18.524';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1594,12 +1594,17 @@ function settingsView() {
 
 function helpView() {
   const topics = [
-    ['Futbol okulu olarak nasıl başvurulur?', 'Futbol okulu başvurusunun nasıl oluşturulduğunu adım adım izleyin.'],
-    ['Şifre nasıl oluşturulur?', 'Davet e-postasındaki bağlantıyı kullanarak hesabınızı nasıl etkinleştireceğinizi izleyin.'],
-    ['Ücretsiz deneme nasıl başlatılır?', '3 aylık ücretsiz denemeyi başlatma ve abonelik seçeneklerini görüntüleme adımlarını izleyin.'],
-    ['Yeni öğrenci nasıl eklenir?', 'Öğrenci, veli iletişim bilgileri ve aidat bilgilerinin nasıl kaydedildiğini izleyin.']
+    { question: 'Futbol okulu olarak nasıl başvurulur?', description: 'Futbol okulu başvurusunun nasıl oluşturulduğunu adım adım izleyin.', video: 'tutorials/school-application-guide.mp4' },
+    { question: 'Şifre nasıl oluşturulur?', description: 'Davet e-postasındaki bağlantıyı kullanarak hesabınızı nasıl etkinleştireceğinizi izleyin.', video: 'tutorials/password-setup-guide.mp4' },
+    { question: 'Ücretsiz deneme nasıl başlatılır?', description: '3 aylık ücretsiz denemeyi başlatma ve abonelik seçeneklerini görüntüleme adımlarını izleyin.' },
+    { question: 'Yeni öğrenci nasıl eklenir?', description: 'Öğrenci, veli iletişim bilgileri ve aidat bilgilerinin nasıl kaydedildiğini izleyin.' }
   ];
-  const cards = topics.map(([question, description]) => `<details class="panel help-topic-card"><summary><span>${escapeHtml(question)}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><div class="help-topic-content"><p>${escapeHtml(description)}</p><div class="help-video-placeholder"><span aria-hidden="true">▶</span><strong>Kullanım videosu</strong><small>Video bağlantısı eklendiğinde burada izlenebilecek.</small></div></div></details>`).join('');
+  const cards = topics.map(topic => {
+    const videoMarkup = topic.video
+      ? `<video class="help-video-player" controls playsinline preload="metadata"><source src="${escapeHtml(topic.video)}" type="video/mp4">Tarayıcınız video oynatmayı desteklemiyor.</video>`
+      : '<div class="help-video-placeholder"><span aria-hidden="true">▶</span><strong>Kullanım videosu</strong><small>Video bağlantısı eklendiğinde burada izlenebilecek.</small></div>';
+    return `<details class="panel help-topic-card"><summary><span>${escapeHtml(topic.question)}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary><div class="help-topic-content"><p>${escapeHtml(topic.description)}</p>${videoMarkup}</div></details>`;
+  }).join('');
   return `<div class="page-stack"><div class="section-heading"><div><h2>Yardım</h2><p>Merak ettiğiniz konuyu açarak kullanım videosuna ulaşabilirsiniz.</p></div></div><section class="help-topic-list" aria-label="Yardım konuları">${cards}</section></div>`;
 }
 
