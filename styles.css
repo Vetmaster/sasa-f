@@ -696,7 +696,7 @@ dialog::backdrop { background: rgba(45,42,37,.62); backdrop-filter: blur(3px); }
 .student-photo-controls { display: grid; gap: 5px; min-width: 0; }
 .student-photo-controls > span { color: var(--muted); font-size: 12px; line-height: 1.45; }
 .student-photo-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-.student-photo-actions .secondary-button { width: max-content; cursor: pointer; }
+.student-photo-actions .secondary-button { width: max-content; display: inline-flex; align-items: center; justify-content: center; line-height: 1; cursor: pointer; }
 .student-photo-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .student-profile-hero h2 { margin: 5px 0; font-size: 28px; }
 .student-profile-hero p { margin: 0; color: var(--muted); }
