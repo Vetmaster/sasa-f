@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.21.528';
+const APP_VERSION = '2026.10.25.529';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1596,7 +1596,7 @@ function helpView() {
   const topics = [
     { question: 'Futbol okulu olarak nasıl başvurulur?', description: 'Futbol okulu başvurusunun nasıl oluşturulduğunu adım adım izleyin.', video: 'tutorials/school-application-guide.mp4' },
     { question: 'Şifre nasıl oluşturulur?', description: 'Davet e-postasındaki bağlantıyı kullanarak hesabınızı nasıl etkinleştireceğinizi izleyin.', video: 'tutorials/password-setup-guide.mp4' },
-    { question: 'Ücretsiz deneme nasıl başlatılır?', description: '3 aylık ücretsiz denemeyi başlatma ve abonelik seçeneklerini görüntüleme adımlarını izleyin.' },
+    { question: 'Ücretsiz deneme nasıl başlatılır?', description: '3 aylık ücretsiz denemeyi başlatma ve abonelik seçeneklerini görüntüleme adımlarını izleyin.', video: 'tutorials/free-trial-guide.mp4' },
     { question: 'Yeni öğrenci nasıl eklenir?', description: 'Öğrenci, veli iletişim bilgileri ve aidat bilgilerinin nasıl kaydedildiğini izleyin.', video: 'tutorials/new-student-guide.mp4' }
   ];
   const cards = topics.map(topic => {
