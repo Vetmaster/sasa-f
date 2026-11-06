@@ -100,7 +100,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
 .sidebar-theme-switch[aria-checked="true"] .sidebar-theme-switch-track { background: #25333a; }
 .sidebar-theme-switch[aria-checked="true"] .sidebar-theme-switch-thumb { transform: translateX(0); }
 .sidebar-theme-switch:focus-visible { outline: 3px solid rgba(255,255,255,.4); outline-offset: 3px; }
-.sidebar-theme-control { display: none; flex: 0 0 auto; align-items: center; justify-content: center; gap: 7px; margin-top: 12px; padding: 14px 8px 0; border-top: 1px solid rgba(255,255,255,.12); }
+.sidebar-theme-control { display: none; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 12px; padding: 14px 8px 0; border-top: 1px solid rgba(255,255,255,.12); }
 .sidebar-theme-symbol { width: 14px; height: 14px; flex: 0 0 14px; fill: none; stroke: rgba(255,255,255,.76); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .sidebar-theme-sun { width: 15px; height: 15px; flex-basis: 15px; }
 .main-nav { min-height: 0; flex: 1 1 auto; display: grid; align-content: start; gap: 5px; overflow-y: auto; }
