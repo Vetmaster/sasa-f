@@ -40,6 +40,7 @@ jobs:
             styles.css
             manifest.webmanifest
             service-worker.js
+            theme-init.js
             custom-domain.js
             firebase-web-config.js
             local-db.js
@@ -98,6 +99,7 @@ jobs:
           test -f "${deploy_dir}/styles.css"
           test -f "${deploy_dir}/manifest.webmanifest"
           test -f "${deploy_dir}/service-worker.js"
+          test -f "${deploy_dir}/theme-init.js"
           test -f "${deploy_dir}/tutorials/school-application-guide.mp4"
           test -f "${deploy_dir}/tutorials/password-setup-guide.mp4"
           test -f "${deploy_dir}/tutorials/new-student-guide.mp4"

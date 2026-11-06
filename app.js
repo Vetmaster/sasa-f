@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.10.25.531';
+const APP_VERSION = '2026.11.06.532';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -531,6 +531,7 @@ const appContent = document.querySelector('#appContent');
 const mainNav = document.querySelector('#mainNav');
 const bottomNav = document.querySelector('#bottomNav');
 const globalBackButton = document.querySelector('#globalBackButton');
+const themeToggleButton = document.querySelector('#themeToggleButton');
 let mobileTabSwipeStart = null;
 let mobileTabSwipeSuppressClickUntil = 0;
 const loginForm = document.querySelector('#loginForm');
@@ -4775,6 +4776,25 @@ document.querySelector('#adminMfaCancelButton').addEventListener('click', async 
 document.querySelector('#logoutButton').addEventListener('click', logout);
 document.querySelector('#pendingAccessLogoutButton')?.addEventListener('click', logout);
 globalBackButton.addEventListener('click', requestAppBack);
+function updateThemeToggleButton() {
+  const isDark = document.documentElement.dataset.theme === 'dark';
+  const label = isDark ? 'Aydınlık modu aç' : 'Karanlık modu aç';
+  themeToggleButton?.setAttribute('aria-label', label);
+  themeToggleButton?.setAttribute('title', label);
+}
+
+themeToggleButton?.addEventListener('click', () => {
+  const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nextTheme;
+  document.documentElement.style.colorScheme = nextTheme;
+  try {
+    window.localStorage.setItem(window.SasaTheme?.storageKey || 'sasa_color_theme', nextTheme);
+  } catch {
+    // Depolama kapalıysa tema yalnızca mevcut oturumda uygulanır.
+  }
+  updateThemeToggleButton();
+});
+updateThemeToggleButton();
 appContent.addEventListener('touchstart', event => {
   if (event.touches.length !== 1 || !window.matchMedia('(max-width: 820px)').matches || isMobileTabSwipeBlocked(event.target)) {
     mobileTabSwipeStart = null;

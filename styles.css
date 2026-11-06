@@ -14,7 +14,20 @@
   --shadow: 0 12px 32px rgba(91, 75, 58, .1);
   --font: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+html[data-theme="dark"] {
+  --ink: #edf2f4;
+  --muted: #aab6bc;
+  --line: #34434a;
+  --paper: #10171b;
+  --panel: #182126;
+  --brand: #72acc4;
+  --brand-dark: #4b8aa4;
+  --brand-soft: #243a43;
+  --shadow: 0 12px 32px rgba(0, 0, 0, .28);
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
+html { background: var(--paper); }
 body { margin: 0; min-width: 320px; font-family: var(--font); color: var(--ink); background: var(--paper); }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
@@ -127,6 +140,32 @@ input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shad
   background: #fff;
   cursor: pointer;
 }
+.topbar-theme-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--brand);
+  background: #fff;
+}
+.topbar-theme-button:hover { background: var(--brand-soft); }
+.topbar-theme-button .theme-icon {
+  width: 19px;
+  height: 19px;
+  grid-area: 1 / 1;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.topbar-theme-button .theme-icon-sun { display: none; }
+html[data-theme="dark"] .topbar-theme-button .theme-icon-moon { display: none; }
+html[data-theme="dark"] .topbar-theme-button .theme-icon-sun { display: block; }
 .notification-unread-badge {
   min-width: 18px;
   height: 18px;
@@ -738,6 +777,30 @@ dialog::backdrop { background: rgba(45,42,37,.62); backdrop-filter: blur(3px); }
 .install-prompt-never-show { display: flex; align-items: center; gap: 8px; padding: 6px 10px; color: white; font-size: 14px; cursor: pointer; }
 .install-prompt-never-show input { width: 18px; height: 18px; margin: 0; accent-color: #fff; }
 .bottom-nav, .sidebar-scrim { display: none; }
+
+html[data-theme="dark"] .topbar { background: rgba(16, 23, 27, .92); }
+html[data-theme="dark"] :is(input, select, textarea, .secondary-button, .global-back-button, .topbar-notification-button, .topbar-theme-button, .session-role, .heading-icon-button, .iban-prefix-control, .student-search-results, .student-search-option, .ledger-actions, .attendance-status-option, table, dialog) {
+  color: var(--ink);
+  background-color: #1d292f;
+}
+html[data-theme="dark"] :is(input, textarea)::placeholder { color: #819097; }
+html[data-theme="dark"] label { color: #d3dde1; }
+html[data-theme="dark"] .topbar select { background-color: #1d292f; }
+html[data-theme="dark"] .current-school-name { background: rgba(29, 41, 47, .9); }
+html[data-theme="dark"] .notification-unread-badge { border-color: #1d292f; }
+html[data-theme="dark"] .mfa-secret { background: #1d292f; }
+html[data-theme="dark"] .mfa-secret code { color: var(--brand); }
+html[data-theme="dark"] .data-save-loading-card { background: rgba(24, 33, 38, .97); }
+html[data-theme="dark"] th { background: #202c32; }
+html[data-theme="dark"] tbody tr:hover { background: #24343b; }
+html[data-theme="dark"] .dashboard-notification-prompt { background: linear-gradient(135deg, rgba(205, 18, 10, .12), rgba(24, 33, 38, .96)); }
+html[data-theme="dark"] .parent-bank-account:is(.bank-theme-akbank, .bank-theme-garanti, .bank-theme-yapi-kredi, .bank-theme-is-bankasi, .bank-theme-ziraat, .bank-theme-halkbank, .bank-theme-vakifbank, .bank-theme-qnb, .bank-theme-denizbank, .bank-theme-teb, .bank-theme-ing, .bank-theme-kuveyt-turk, .bank-theme-albaraka) .parent-bank-details > div { background: rgba(16, 23, 27, .68); }
+html[data-theme="dark"] .training-card.is-past { background: #20282c; border-color: #39464c; }
+html[data-theme="dark"] .training-card.is-past :is(.training-schedule, .training-meta) { color: var(--muted); }
+html[data-theme="dark"] .player-card-dialog { background: #171f23; }
+html[data-theme="dark"] .player-card-dialog-heading { background: rgba(23, 31, 35, .94); }
+html[data-theme="dark"] .attendance-status-option.present { color: #72cba4; background: #1d292f; }
+html[data-theme="dark"] .attendance-status-option.absent { color: #ff817a; background: #1d292f; }
 @keyframes mobile-tab-enter-next { from { opacity: .68; transform: translateX(22px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes mobile-tab-enter-previous { from { opacity: .68; transform: translateX(-22px); } to { opacity: 1; transform: translateX(0); } }
 @media (min-width: 821px) {
@@ -776,6 +839,7 @@ dialog::backdrop { background: rgba(45,42,37,.62); backdrop-filter: blur(3px); }
   #appContent.mobile-tab-swipe-next { animation: mobile-tab-enter-next .2s ease-out; }
   #appContent.mobile-tab-swipe-previous { animation: mobile-tab-enter-previous .2s ease-out; }
   .bottom-nav { position: fixed; inset: auto 0 0; z-index: 22; display: grid; grid-template-columns: repeat(4, 1fr); padding: 7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); border-top: 1px solid var(--line); background: rgba(255,253,249,.96); backdrop-filter: blur(12px); }
+  html[data-theme="dark"] .bottom-nav { background: rgba(24, 33, 38, .96); }
   .bottom-nav .nav-button { min-height: 52px; justify-content: center; flex-direction: column; gap: 2px; padding: 4px; color: var(--muted); font-size: 10px; }
   .bottom-nav .nav-button.active { color: var(--brand); background: var(--brand-soft); }
   .bottom-nav .nav-icon { height: 20px; }

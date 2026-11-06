@@ -20,7 +20,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Anta&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="custom-domain.js?v=2026.09.07.365"></script>
   <script src="firebase-web-config.js?v=2026.08.30.363"></script>
-  <link rel="stylesheet" href="styles.css?v=2026.10.20.531">
+  <script src="theme-init.js?v=2026.11.06.532"></script>
+  <link rel="stylesheet" href="styles.css?v=2026.11.06.532">
 </head>
 <body>
   <main class="domain-maintenance" id="domainMaintenance" aria-labelledby="maintenanceTitle">
@@ -142,6 +143,10 @@
             <option value="coach">Antrenör</option>
             <option value="parent">Veli</option>
           </select>
+          <button class="topbar-theme-button" id="themeToggleButton" type="button" aria-label="Karanlık modu aç" title="Karanlık modu aç">
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.5 8.5 0 1 0 20.2 15.3Z"></path></svg>
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+          </button>
           <button class="topbar-notification-button" type="button" data-page="notifications" aria-label="Bildirimleri aç">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path>
@@ -427,6 +432,6 @@
   <script src="students-seed.js?v=2026.07.24.112"></script>
   <script src="local-db.js?v=2026.07.24.112"></script>
   <script src="supabase-data.js?v=2026.09.29.513"></script>
-  <script src="app.js?v=2026.10.25.531"></script>
+  <script src="app.js?v=2026.11.06.532"></script>
 </body>
 </html>
