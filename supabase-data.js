@@ -794,10 +794,12 @@
     }
 
     async function createSubscriptionPaymentReport({ billingPeriod, note }) {
+      requireContext();
       const { data, error } = await client.rpc('create_subscription_payment_report', {
         requested_plan: 'standard',
         requested_billing_period: billingPeriod,
-        payer_note: note || null
+        payer_note: note || null,
+        target_school_id: schoolId
       });
       if (error) throw error;
       return Array.isArray(data) ? data[0] : data;
