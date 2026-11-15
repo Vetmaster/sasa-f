@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.540';
+const APP_VERSION = '2026.11.15.541';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -3499,12 +3499,16 @@ let dataSaveLoadingShownAt = 0;
 let dataSaveLoadingCloseTimer = 0;
 let dataSaveLoadingSafetyTimer = 0;
 
-function showDataSaveLoading() {
+function showDataSaveLoading(options = {}) {
   window.clearTimeout(dataSaveLoadingCloseTimer);
   window.clearTimeout(dataSaveLoadingSafetyTimer);
   dataSaveLoadingShownAt = Date.now();
   const loadingScreen = document.querySelector('#dataSaveLoadingScreen');
   if (!loadingScreen) return;
+  const loadingTitle = loadingScreen.querySelector('h2');
+  const loadingMessage = loadingScreen.querySelector('p');
+  if (loadingTitle) loadingTitle.textContent = String(options.title || 'Kulüp verileri kaydediliyor..');
+  if (loadingMessage) loadingMessage.textContent = String(options.message || 'İşleminiz tamamlanıyor. Lütfen bekleyin.');
   loadingScreen.classList.remove('is-hidden');
   if (typeof loadingScreen.showModal === 'function' && !loadingScreen.open) loadingScreen.showModal();
   dataSaveLoadingSafetyTimer = window.setTimeout(() => {
@@ -3552,6 +3556,7 @@ function showToast(message, tone = 'info', duration = 2800) {
 function showRecordCreated(message, options = {}) {
   const visibleDuration = Number.isFinite(Number(options.duration)) ? Math.max(1000, Number(options.duration)) : 3000;
   const titleText = String(options.title || 'İşlem tamamlandı');
+  const confirmLabel = String(options.confirmLabel || '').trim();
   hideDataSaveLoading();
   window.clearTimeout(showRecordCreated.openTimer);
   window.clearTimeout(showRecordCreated.closeTimer);
@@ -3559,9 +3564,10 @@ function showRecordCreated(message, options = {}) {
   showRecordCreated.openTimer = window.setTimeout(() => {
     const overlay = document.createElement('div');
     overlay.id = 'recordSuccessOverlay';
-    overlay.setAttribute('role', 'status');
-    overlay.setAttribute('aria-live', 'assertive');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(45,42,37,.38);pointer-events:none;';
+    overlay.setAttribute('role', confirmLabel ? 'dialog' : 'status');
+    if (confirmLabel) overlay.setAttribute('aria-modal', 'true');
+    else overlay.setAttribute('aria-live', 'assertive');
+    overlay.style.cssText = `position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(45,42,37,.38);pointer-events:${confirmLabel ? 'auto' : 'none'};`;
     const card = document.createElement('div');
     card.style.cssText = 'display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:16px;width:min(430px,100%);padding:24px;border:1px solid rgba(23,107,69,.24);border-radius:20px;color:#26231f;background:#fffdf9;box-shadow:0 24px 70px rgba(32,28,24,.34);';
     const icon = document.createElement('div');
@@ -3576,20 +3582,35 @@ function showRecordCreated(message, options = {}) {
     description.textContent = message;
     description.style.cssText = 'margin:6px 0 0;color:#26231f;font-size:15px;font-weight:700;line-height:1.5;';
     copy.append(title, description);
-    const progress = document.createElement('div');
-    progress.setAttribute('aria-hidden', 'true');
-    progress.style.cssText = 'grid-column:1/-1;height:5px;overflow:hidden;margin-top:2px;border-radius:999px;background:rgba(23,107,69,.14);';
-    const progressFill = document.createElement('div');
-    progressFill.style.cssText = 'width:100%;height:100%;border-radius:inherit;background:#176b45;transform:scaleX(0);transform-origin:left center;';
-    progress.append(progressFill);
-    card.append(icon, copy, progress);
+    card.append(icon, copy);
+    let progressFill = null;
+    if (confirmLabel) {
+      const confirmButton = document.createElement('button');
+      confirmButton.type = 'button';
+      confirmButton.className = 'primary-button';
+      confirmButton.textContent = confirmLabel;
+      confirmButton.style.cssText = 'grid-column:1/-1;justify-self:end;min-width:110px;min-height:40px;margin-top:4px;';
+      confirmButton.addEventListener('click', () => overlay.remove());
+      card.append(confirmButton);
+      window.requestAnimationFrame(() => confirmButton.focus());
+    } else {
+      const progress = document.createElement('div');
+      progress.setAttribute('aria-hidden', 'true');
+      progress.style.cssText = 'grid-column:1/-1;height:5px;overflow:hidden;margin-top:2px;border-radius:999px;background:rgba(23,107,69,.14);';
+      progressFill = document.createElement('div');
+      progressFill.style.cssText = 'width:100%;height:100%;border-radius:inherit;background:#176b45;transform:scaleX(0);transform-origin:left center;';
+      progress.append(progressFill);
+      card.append(progress);
+    }
     overlay.append(card);
     document.body.append(overlay);
-    progressFill.animate(
-      [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
-      { duration: visibleDuration, easing: 'linear', fill: 'forwards' }
-    );
-    showRecordCreated.closeTimer = window.setTimeout(() => overlay.remove(), visibleDuration);
+    if (progressFill) {
+      progressFill.animate(
+        [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+        { duration: visibleDuration, easing: 'linear', fill: 'forwards' }
+      );
+      showRecordCreated.closeTimer = window.setTimeout(() => overlay.remove(), visibleDuration);
+    }
   }, 0);
 }
 
@@ -4920,7 +4941,13 @@ document.addEventListener('click', async event => {
   }
   else if (action === 'review-payment-report' && state.role === 'super_admin') {
     const approved = actionButton.dataset.approved === 'true';
-    const note = window.prompt(approved ? 'Onay notu (isteğe bağlı):' : 'İptal nedeni (isteğe bağlı):') || '';
+    const note = approved ? '' : (window.prompt('İptal nedeni (isteğe bağlı):') || '');
+    if (approved) {
+      showDataSaveLoading({
+        title: 'Ödeme onaylanıyor..',
+        message: 'Abonelik dönemi işleniyor. Lütfen bekleyin.'
+      });
+    }
     const saved = await runRemoteMutation(() => remoteDataStore.reviewSubscriptionPaymentReport({ reportId: actionButton.dataset.id, approved, note }));
     if (!saved) return;
     if (approved && saved.reported_by) {
@@ -4941,7 +4968,14 @@ document.addEventListener('click', async event => {
     state.subscriptionPaymentReports = await remoteDataStore.listSubscriptionPaymentReports();
     await refreshSchools();
     render();
-    showToast(approved ? 'Ödeme onaylandı ve abonelik dönemi işlendi.' : 'Ödeme bildirimi iptal edildi.');
+    if (approved) {
+      showRecordCreated('Abonelik dönemi işlendi ve okulun kullanım süresine eklendi.', {
+        title: 'Ödeme onaylandı',
+        confirmLabel: 'Tamam'
+      });
+    } else {
+      showToast('Ödeme bildirimi iptal edildi.');
+    }
   }
   else if (action === 'start-school-trial' && state.role === 'admin') {
     const saved = await runRemoteMutation(() => remoteDataStore.startSchoolTrial());
