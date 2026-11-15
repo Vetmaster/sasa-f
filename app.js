@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.542';
+const APP_VERSION = '2026.11.15.543';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -5065,9 +5065,20 @@ document.addEventListener('click', async event => {
       showToast('Lütfen havaleyi gönderen kişinin adını ve soyadını yazın.');
       return;
     }
+    const paymentPeriod = subscriptionPeriodLabel(billingPeriod);
+    const confirmed = await showConfirmationDialog({
+      title: 'Ödeme bildirimi gönderilsin mi?',
+      message: `${paymentPeriod} abonelik ödemesi yaptığınız SASA-F’ye bildirilecektir. Bildirim, ödeme onaylanana kadar aboneliği etkinleştirmez.`,
+      confirmLabel: 'Tamam',
+      cancelLabel: 'İptal'
+    });
+    if (!confirmed) return;
+    showDataSaveLoading({
+      title: 'Ödeme bildirimi gönderiliyor..',
+      message: 'Bildiriminiz SASA-F’ye iletiliyor. Lütfen bekleyin.'
+    });
     const saved = await runRemoteMutation(() => remoteDataStore.createSubscriptionPaymentReport({ billingPeriod, note }));
     if (!saved) return;
-    const paymentPeriod = subscriptionPeriodLabel(billingPeriod);
     await invokePushFunction({
       action: 'create-and-send',
       schoolId: saved.school_id || state.schoolId,
