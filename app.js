@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.539';
+const APP_VERSION = '2026.11.15.540';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -911,7 +911,7 @@ function notificationDate(value) {
   return new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(date);
 }
 function notificationTargetLabel(audience) {
-  if (audience === 'Süper Admin') return 'Süper Admin';
+  if (audience === 'Süper Admin') return 'SASA-F';
   if (audience === 'Abonelik işlemi') return state.schoolName || 'Okul';
   return ['Aidat borcu olanlar', 'Aidat borcu olmayanlar'].includes(audience)
     ? 'Aidat hatırlatma'
