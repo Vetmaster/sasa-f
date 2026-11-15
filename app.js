@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.541';
+const APP_VERSION = '2026.11.15.542';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -3553,6 +3553,64 @@ function showToast(message, tone = 'info', duration = 2800) {
   showToast.timer = window.setTimeout(() => toast.classList.remove('show'), duration);
 }
 
+function showConfirmationDialog({ title, message, confirmLabel = 'Onayla', cancelLabel = 'İptal' }) {
+  return new Promise(resolve => {
+    document.querySelector('#actionConfirmOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'actionConfirmOverlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'actionConfirmTitle');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(45,42,37,.48);';
+
+    const card = document.createElement('div');
+    card.style.cssText = 'display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:16px;width:min(440px,100%);padding:24px;border:1px solid var(--line);border-radius:20px;color:var(--ink);background:var(--panel);box-shadow:0 24px 70px rgba(32,28,24,.34);';
+    const icon = document.createElement('div');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '₺';
+    icon.style.cssText = 'display:grid;place-items:center;width:48px;height:48px;border-radius:50%;color:#fff;background:var(--brand);font-size:24px;font-weight:900;';
+    const copy = document.createElement('div');
+    const heading = document.createElement('strong');
+    heading.id = 'actionConfirmTitle';
+    heading.textContent = title;
+    heading.style.cssText = 'display:block;color:var(--ink);font-size:19px;';
+    const description = document.createElement('p');
+    description.textContent = message;
+    description.style.cssText = 'margin:6px 0 0;color:var(--muted);font-size:14px;font-weight:600;line-height:1.5;';
+    copy.append(heading, description);
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'grid-column:1/-1;display:flex;justify-content:flex-end;gap:9px;margin-top:5px;';
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'secondary-button';
+    cancelButton.textContent = cancelLabel;
+    cancelButton.style.cssText = 'min-width:100px;min-height:40px;';
+    const confirmButton = document.createElement('button');
+    confirmButton.type = 'button';
+    confirmButton.className = 'primary-button';
+    confirmButton.textContent = confirmLabel;
+    confirmButton.style.cssText = 'min-width:100px;min-height:40px;';
+    actions.append(cancelButton, confirmButton);
+    card.append(icon, copy, actions);
+    overlay.append(card);
+
+    const finish = accepted => {
+      document.removeEventListener('keydown', handleKeydown);
+      overlay.remove();
+      resolve(accepted);
+    };
+    const handleKeydown = event => {
+      if (event.key === 'Escape') finish(false);
+    };
+    cancelButton.addEventListener('click', () => finish(false));
+    confirmButton.addEventListener('click', () => finish(true));
+    document.addEventListener('keydown', handleKeydown);
+    document.body.append(overlay);
+    window.requestAnimationFrame(() => cancelButton.focus());
+  });
+}
+
 function showRecordCreated(message, options = {}) {
   const visibleDuration = Number.isFinite(Number(options.duration)) ? Math.max(1000, Number(options.duration)) : 3000;
   const titleText = String(options.title || 'İşlem tamamlandı');
@@ -4943,6 +5001,13 @@ document.addEventListener('click', async event => {
     const approved = actionButton.dataset.approved === 'true';
     const note = approved ? '' : (window.prompt('İptal nedeni (isteğe bağlı):') || '');
     if (approved) {
+      const confirmed = await showConfirmationDialog({
+        title: 'Ödeme onaylansın mı?',
+        message: 'Onaylandığında abonelik dönemi okulun mevcut kullanım süresine eklenecektir.',
+        confirmLabel: 'Onayla',
+        cancelLabel: 'İptal'
+      });
+      if (!confirmed) return;
       showDataSaveLoading({
         title: 'Ödeme onaylanıyor..',
         message: 'Abonelik dönemi işleniyor. Lütfen bekleyin.'
