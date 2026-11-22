@@ -19,6 +19,12 @@ type SchoolRow = {
   subscription_ends_on: string | null;
 };
 
+type ScheduledPeriodRow = {
+  school_id: string;
+  billing_period: BillingPeriod;
+  ends_on: string;
+};
+
 type Recipient = {
   user_id: string;
   full_name: string | null;
@@ -430,7 +436,37 @@ Deno.serve(async request => {
     .lte('subscription_ends_on', windowEnd);
   if (schoolsError) return json({ error: schoolsError.message }, 500);
 
-  const dueSchools = ((schools || []) as SchoolRow[]).filter(school => {
+  const schoolRows = (schools || []) as SchoolRow[];
+  const latestScheduledPeriodBySchool = new Map<string, ScheduledPeriodRow>();
+  if (schoolRows.length) {
+    const { data: scheduledPeriods, error: scheduledPeriodsError } = await admin
+      .from('school_subscription_periods')
+      .select('school_id, billing_period, ends_on')
+      .in('school_id', schoolRows.map(school => school.id))
+      .eq('status', 'SCHEDULED')
+      .gte('ends_on', today)
+      .order('ends_on', { ascending: true });
+    if (scheduledPeriodsError) return json({ error: scheduledPeriodsError.message }, 500);
+
+    for (const period of (scheduledPeriods || []) as ScheduledPeriodRow[]) {
+      const current = latestScheduledPeriodBySchool.get(period.school_id);
+      if (!current || period.ends_on > current.ends_on) {
+        latestScheduledPeriodBySchool.set(period.school_id, period);
+      }
+    }
+  }
+
+  const schoolsWithEffectiveEndDate = schoolRows.map(school => {
+    const scheduledPeriod = latestScheduledPeriodBySchool.get(school.id);
+    if (!scheduledPeriod || scheduledPeriod.ends_on <= String(school.subscription_ends_on)) return school;
+    return {
+      ...school,
+      subscription_billing_period: scheduledPeriod.billing_period,
+      subscription_ends_on: scheduledPeriod.ends_on
+    };
+  });
+
+  const dueSchools = schoolsWithEffectiveEndDate.filter(school => {
     const period = school.subscription_billing_period || 'monthly';
     const daysUntilEnd = daysBetween(today, String(school.subscription_ends_on));
     return daysUntilEnd <= reminderWindow(period) && reminderIsDue(period, daysUntilEnd);
@@ -562,5 +598,5 @@ Deno.serve(async request => {
     results.push({ schoolId: school.id, schoolName: school.name, daysUntilEnd, status, emailCount, pushCount, recipientCount: recipientIds.length });
   }
 
-  return json({ today, scanned: schools?.length || 0, due: dueSchools.length, results });
+  return json({ today, scanned: schoolRows.length, due: dueSchools.length, results });
 });
