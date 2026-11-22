@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.22.545';
+const APP_VERSION = '2026.11.22.546';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1325,6 +1325,17 @@ function trialRemainingLabel(endsOn) {
   return daysRemaining === 0 ? 'Bugün son gününüz.' : `${daysRemaining} gün kaldı.`;
 }
 
+function subscriptionRemainingLabel(endsOn, billingPeriod) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(endsOn || ''))) return '';
+  const reminderWindowDays = { monthly: 7, quarterly: 30, yearly: 60 }[billingPeriod];
+  if (!reminderWindowDays) return '';
+  const today = new Date(`${localDateValue()}T12:00:00`);
+  const endDate = new Date(`${endsOn}T12:00:00`);
+  const daysRemaining = Math.max(0, Math.round((endDate - today) / 86400000));
+  if (daysRemaining > reminderWindowDays) return '';
+  return daysRemaining === 0 ? 'Bugün son gününüz.' : `${daysRemaining} gün kaldı.`;
+}
+
 function formatDateTime(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
@@ -1512,7 +1523,7 @@ function onboardingView() {
   const approvedPeriod = state.approvedSubscriptionPeriod;
   if (subscriptionActive && !state.onboardingPurchaseOpen) {
     const subscriptionEndsOn = state.schoolSubscriptionEndsOn;
-    const remaining = trialRemainingLabel(subscriptionEndsOn);
+    const remaining = subscriptionRemainingLabel(subscriptionEndsOn, state.schoolSubscriptionBillingPeriod);
     const paymentPendingNotice = paymentPending ? `<p class="onboarding-trial-remaining"><strong>Yeni ödeme bildiriminiz incelemede.</strong><br>sasa-f.com ödemeyi onayladığında satın aldığınız süre mevcut abonelik bitiş tarihinize eklenecek.</p>` : '';
     return `<div class="page-stack"><section class="panel onboarding-card"><span class="eyebrow">ABONELİĞİNİZ AKTİF</span><h2>Standart üyeliğiniz devam ediyor.</h2><p>Abonelik sürenizi ve yenileme bilgilerinizi buradan takip edebilirsiniz.</p><p class="onboarding-trial-remaining"><strong>Abonelik süresi:</strong> ${subscriptionPeriodLabel(state.schoolSubscriptionBillingPeriod)}<br><strong>Abonelik bitişi:</strong> ${subscriptionDateLabel(subscriptionEndsOn)}${remaining ? ` · ${remaining}` : ''}</p>${paymentPendingNotice}<div class="onboarding-actions"><button class="primary-button" type="button" data-action="complete-onboarding">Yönetim ekranına geç</button><button class="secondary-button" type="button" data-action="open-subscription-purchase">Süre uzat</button></div></section>${subscriptionHistorySection()}</div>`;
   }
