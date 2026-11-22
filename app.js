@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.22.546';
+const APP_VERSION = '2026.11.22.547';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -2435,6 +2435,15 @@ function render() {
     : state.schoolName || 'Futbol Okulu';
   document.querySelector('#appBannerSubtitle').textContent = bannerSubtitle;
   document.querySelector('#sidebarBannerSubtitle').textContent = bannerSubtitle;
+  const subscriptionCountdownBanner = document.querySelector('#subscriptionCountdownBanner');
+  const subscriptionRemaining = state.role === 'admin' && state.page === 'dashboard' && state.schoolSubscriptionStatus === 'active'
+    ? subscriptionRemainingLabel(state.schoolSubscriptionEndsOn, state.schoolSubscriptionBillingPeriod)
+    : '';
+  subscriptionCountdownBanner.textContent = subscriptionRemaining === 'Bugün son gününüz.'
+    ? 'Aboneliğiniz bugün sona eriyor.'
+    : subscriptionRemaining ? `Aboneliğinizin bitmesine ${subscriptionRemaining}` : '';
+  subscriptionCountdownBanner.classList.toggle('is-hidden', !subscriptionRemaining);
+  document.querySelector('.app-banner').classList.toggle('has-subscription-countdown', Boolean(subscriptionRemaining));
   const topbarSessionRole = document.querySelector('#topbarSessionRole');
   topbarSessionRole.textContent = roleNames[state.role];
   topbarSessionRole.classList.toggle('is-hidden', isActualSuperAdmin() || state.role === 'parent');
