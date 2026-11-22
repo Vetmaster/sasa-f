@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.544';
+const APP_VERSION = '2026.11.22.545';
 const ANDROID_APK_URL = 'https://github.com/Vetmaster/sporx-futbol-okulu/releases/download/v1.0.30-beta/SASA-F-v1.0.30-beta.apk';
 const INSTALL_PROMPT_DISMISS_KEY = 'sasa_install_prompt_dismissed_v2';
 const INSTALL_PROMPT_SESSION_DISMISS_KEY = 'sasa_install_prompt_dismissed_this_session';
@@ -1315,39 +1315,6 @@ function schoolsView() {
 function subscriptionDateLabel(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return 'Belirlenmedi';
   return new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
-}
-
-function subscriptionExtensionRestriction() {
-  if (state.schoolSubscriptionStatus !== 'active') return null;
-  const billingPeriod = state.schoolSubscriptionBillingPeriod;
-  const endValue = String(state.schoolSubscriptionEndsOn || '');
-  if (!['monthly', 'quarterly', 'yearly'].includes(billingPeriod) || !/^\d{4}-\d{2}-\d{2}$/.test(endValue)) return null;
-
-  const endsOn = new Date(`${endValue}T12:00:00`);
-  const eligibleOn = new Date(endsOn);
-  let windowLabel = '';
-  if (billingPeriod === 'monthly') {
-    eligibleOn.setDate(eligibleOn.getDate() - 7);
-    windowLabel = 'son 7 gününde';
-  } else if (billingPeriod === 'quarterly') {
-    eligibleOn.setDate(eligibleOn.getDate() - 14);
-    windowLabel = 'son 14 gününde';
-  } else {
-    const originalDay = eligibleOn.getDate();
-    eligibleOn.setDate(1);
-    eligibleOn.setMonth(eligibleOn.getMonth() - 1);
-    const lastDayOfTargetMonth = new Date(eligibleOn.getFullYear(), eligibleOn.getMonth() + 1, 0).getDate();
-    eligibleOn.setDate(Math.min(originalDay, lastDayOfTargetMonth));
-    windowLabel = 'son 1 ayında';
-  }
-
-  const today = new Date(`${localDateValue()}T12:00:00`);
-  if (today >= eligibleOn) return null;
-  const eligibleDateLabel = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(eligibleOn);
-  return {
-    title: 'Süre uzatma zamanı henüz gelmedi',
-    message: `${subscriptionPeriodLabel(billingPeriod)} aboneliğinizi yalnızca bitiş tarihinin ${windowLabel} uzatabilirsiniz. ${eligibleDateLabel} tarihinden itibaren tekrar deneyebilirsiniz.`
-  };
 }
 
 function trialRemainingLabel(endsOn) {
@@ -3648,8 +3615,6 @@ function showRecordCreated(message, options = {}) {
   const visibleDuration = Number.isFinite(Number(options.duration)) ? Math.max(1000, Number(options.duration)) : 3000;
   const titleText = String(options.title || 'İşlem tamamlandı');
   const confirmLabel = String(options.confirmLabel || '').trim();
-  const isInformation = options.tone === 'info';
-  const accentColor = isInformation ? '#2f718a' : '#176b45';
   hideDataSaveLoading();
   window.clearTimeout(showRecordCreated.openTimer);
   window.clearTimeout(showRecordCreated.closeTimer);
@@ -3662,15 +3627,15 @@ function showRecordCreated(message, options = {}) {
     else overlay.setAttribute('aria-live', 'assertive');
     overlay.style.cssText = `position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(45,42,37,.38);pointer-events:${confirmLabel ? 'auto' : 'none'};`;
     const card = document.createElement('div');
-    card.style.cssText = `display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:16px;width:min(430px,100%);padding:24px;border:1px solid ${isInformation ? 'rgba(47,113,138,.28)' : 'rgba(23,107,69,.24)'};border-radius:20px;color:#26231f;background:#fffdf9;box-shadow:0 24px 70px rgba(32,28,24,.34);`;
+    card.style.cssText = 'display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:16px;width:min(430px,100%);padding:24px;border:1px solid rgba(23,107,69,.24);border-radius:20px;color:#26231f;background:#fffdf9;box-shadow:0 24px 70px rgba(32,28,24,.34);';
     const icon = document.createElement('div');
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = isInformation ? 'i' : '✓';
-    icon.style.cssText = `display:grid;place-items:center;width:52px;height:52px;border-radius:50%;color:#fff;background:${accentColor};box-shadow:0 10px 24px ${isInformation ? 'rgba(47,113,138,.28)' : 'rgba(23,107,69,.28)'};font-size:28px;font-weight:900;`;
+    icon.textContent = '✓';
+    icon.style.cssText = 'display:grid;place-items:center;width:52px;height:52px;border-radius:50%;color:#fff;background:#176b45;box-shadow:0 10px 24px rgba(23,107,69,.28);font-size:28px;font-weight:900;';
     const copy = document.createElement('div');
     const title = document.createElement('strong');
     title.textContent = titleText;
-    title.style.cssText = `display:block;color:${accentColor};font-size:19px;`;
+    title.style.cssText = 'display:block;color:#176b45;font-size:19px;';
     const description = document.createElement('p');
     description.textContent = message;
     description.style.cssText = 'margin:6px 0 0;color:#26231f;font-size:15px;font-weight:700;line-height:1.5;';
@@ -5089,15 +5054,6 @@ document.addEventListener('click', async event => {
     return;
   }
   else if (action === 'open-subscription-purchase' && state.role === 'admin') {
-    const restriction = subscriptionExtensionRestriction();
-    if (restriction) {
-      showRecordCreated(restriction.message, {
-        title: restriction.title,
-        confirmLabel: 'Tamam',
-        tone: 'info'
-      });
-      return;
-    }
     state.onboardingPurchaseOpen = true;
     render();
     return;
